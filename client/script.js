@@ -2,6 +2,28 @@
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
+var directionPressed = 0;
+
+document.addEventListener('keydown', function(event) {
+  if (event.keyCode == 37) {
+    directionPressed = -1;
+
+  }
+  if (event.keyCode == 39) {
+    directionPressed = 1;
+  }
+}, true);
+
+document.addEventListener('keyup', function(event) {
+  if (event.keyCode == 37) {
+    directionPressed = 0;
+
+  }
+  if (event.keyCode == 39) {
+    directionPressed = 0;
+  }
+}, true);
+
 class GameState {
   constructor(posX, posY, map, movVec, speed) {
     this.posX = posX;
@@ -123,9 +145,9 @@ const View = new Visualizer();
 const Engine = new GameEngine();
 
 async function main() {
-  for (let i = 0; i < 1000; i += 1) {
+  for (let i = 0; i < 1000; i += directionPressed) {
     await delay(100);
-    GS.movVec = ((i * 2 % 360) * Math.PI) / 180;
+    GS.movVec = ((i * 2 % 360) * Math.PI) / (45);
     View.clearViewports();
     View.drawMap(GS.map, GS.posX, GS.posY, [], GS.movVec);
     GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, GS.movVec, 0);
