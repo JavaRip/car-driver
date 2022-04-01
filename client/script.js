@@ -2,27 +2,42 @@
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-var directionPressed = 0;
+class Controller {
+  constructor() {
+    // keeps state of current inputs
 
-document.addEventListener('keydown', function(event) {
-  if (event.keyCode == 37) {
-    directionPressed = -1;
+    this.turnLeft = false;
+    this.turnRight = false;
+    this.accel = false;
+    this.parseInputBound = this._parseInput.bind(this);
+    document.addEventListener('keydown', this.parseInputBound);
+    document.addEventListener('keyup', this.parseInputBound);
+  }
 
+  getInput() {
+    const turnLeft = this.turnLeft;
+    const turnRight = this.turnRight;
+    const accel = this.accel;
+    return { turnLeft, turnRight, accel };
   }
-  if (event.keyCode == 39) {
-    directionPressed = 1;
-  }
-}, true);
 
-document.addEventListener('keyup', function(event) {
-  if (event.keyCode == 37) {
-    directionPressed = 0;
-
+  _parseInput(event) {
+    switch (event.key) {
+      case 'a':
+      case 'ArrowLeft':
+        event.type === 'keydown' ? this.turnLeft = true : this.turnLeft = false;
+        break;
+      case 'd':
+      case 'ArrowRight':
+        event.type === 'keydown' ? this.turnRight = true : this.turnRight = false;
+        break;
+      case 'w':
+      case 'ArrowUp':
+        event.type === 'keydown' ? this.accel = true : this.accel = false;
+        break;
+    }
   }
-  if (event.keyCode == 39) {
-    directionPressed = 0;
-  }
-}, true);
+}
 
 class GameState {
   constructor(posX, posY, map, movVec, speed) {
@@ -143,10 +158,13 @@ const map = [{ x1: 60, y1: 50, x2: 60, y2: 90 }];
 const GS = new GameState(canvas.height / 2, canvas.width / 2, map, 1, 10);
 const View = new Visualizer();
 const Engine = new GameEngine();
+const BrowserController = new Controller();
 
 async function main() {
+  const directionPressed = 0;
   for (let i = 0; i < 1000; i += directionPressed) {
-    await delay(100);
+    await delay(200);
+    BrowserController.getInput();
     GS.movVec = ((i * 2 % 360) * Math.PI) / (45);
     View.clearViewports();
     View.drawMap(GS.map, GS.posX, GS.posY, [], GS.movVec);

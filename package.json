@@ -1,7 +1,8 @@
 {
   "devDependencies": {
     "eslint": "^8.12.0",
-    "eslint-config-portsoc": "github:portsoc/eslint-config-portsoc"
+    "eslint-config-portsoc": "github:portsoc/eslint-config-portsoc",
+    "nodemon": "^2.0.15"
   },
   "name": "driving-game",
   "version": "1.0.0",
