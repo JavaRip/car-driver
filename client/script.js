@@ -65,12 +65,7 @@ class Visualizer {
   _drawCarBody(body, strokeWidth, strokeStyle) {
     ctx.strokeWidth = strokeWidth;
     ctx.strokeStyle = strokeStyle;
-
-    for (const coord of body) {
-      ctx.beginPath();
-      ctx.arc(coord.x, coord.y, 5, 0, 2 * Math.PI);
-      ctx.stroke();
-    }
+    this._drawVectorArray(body, strokeWidth, strokeStyle);
   }
 
   _drawCarCenter(posX, posY, strokeWidth, strokeColor) {
@@ -124,14 +119,25 @@ class GameEngine {
     }
 
     const carBody = [];
+    const carWidth = 30;
+    const carLengthHyp = 50; // car length hypotenuse
+
+    const RRRC = this.getRayRelativeToPosition(posX, posY, carWidth, movVec, Math.PI * 0.5);
+    const RRLC = this.getRayRelativeToPosition(posX, posY, carWidth, movVec, Math.PI * 1.5);
+    const FRRC = this.getRayRelativeToPosition(posX, posY, carLengthHyp, movVec, Math.PI * 0.1);
+    const FRLC = this.getRayRelativeToPosition(posX, posY, carLengthHyp, movVec, Math.PI * 1.9);
+
+    carBody.push(FRRC);
+    carBody.push(FRLC);
+    carBody.push(RRRC);
+    carBody.push(RRLC);
 
     return { posX, posY, carBody, movVec, speed };
   }
 
-  getRayRelativeToPosition(posX, posY, movVec, angleOffset) {
+  getRayRelativeToPosition(posX, posY, rayLength, movVec, angleOffset) {
     // without offset, cast the ray directly down the direction the player is facing
     // use offset to cast ray relative to this position. Offset is in radians
-    const rayLength = 75;
     const rayOffsetX = Math.cos(movVec + angleOffset);
     const rayOffsetY = Math.sin(movVec + angleOffset);
     const rayExtendedX = rayOffsetX * rayLength;
@@ -192,7 +198,7 @@ async function main() {
     GS.carBody = newGs.carBody;
     GS.movVec = newGs.movVec;
     GS.speed = newGs.speed;
-    GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, GS.movVec, 0);
+    GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 75, GS.movVec, 0);
 
     View.nextFrame(GS);
   }
