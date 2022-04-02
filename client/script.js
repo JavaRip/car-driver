@@ -1,3 +1,6 @@
+const targetFrameTime = 16;
+let deltaTime = 0
+
 class Controller {
   constructor() {
     this.turnLeft = false;
@@ -113,7 +116,7 @@ class GameEngine {
       rotSpeed += 100;
     }   
 
-    movVec = (movVec + (rotationSpeed * speed/15 * rotSpeed/1250)) % tau;
+    movVec = (movVec + (rotationSpeed * speed/15 * rotSpeed/1250) * deltaTime) % tau;
 
     if (rotSpeed > 0) {
       rotSpeed -= rotSpeed / 10;
@@ -127,17 +130,17 @@ class GameEngine {
     }
       
     if (inputs.accel === true) {
-      if (speed + accelRate <= maxSpeed) speed += accelRate;
+      if (speed + accelRate <= maxSpeed) speed += accelRate * deltaTime;
       else speed = maxSpeed;
 
-      posX += Math.cos(movVec) * speed;
-      posY += Math.sin(movVec) * speed;
+      posX += (Math.cos(movVec) * speed) * deltaTime;
+      posY += (Math.sin(movVec) * speed) * deltaTime;
     } else {
-      if (speed - deccelRate > 0) speed -= accelRate;
+      if (speed - deccelRate > 0) speed -= accelRate * deltaTime;
       else speed = 0;
 
-      posX += Math.cos(movVec) * speed;
-      posY += Math.sin(movVec) * speed;
+      posX += (Math.cos(movVec) * speed) * deltaTime;
+      posY += (Math.sin(movVec) * speed) * deltaTime;
     }
 
     const carBody = [];
@@ -220,8 +223,10 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function main() {
   for (let i = 0; i < Infinity; i += 1) {
-    await delay(16);
+    const startTime = new Date();
 
+    await delay(16);
+    
     const inputs = BrowserController.getInput();
 
     const newGs = Engine.moveCar(GS.posX, GS.posY, GS.movVec, GS.speed, GS.rotSpeed, inputs);
@@ -235,6 +240,10 @@ async function main() {
     GS.colRays = newGs.colRays;
 
     View.nextFrame(GS);
+
+    const endTime = new Date();
+    let actualFrameTime = endTime.getTime() - startTime.getTime();
+    deltaTime = actualFrameTime / targetFrameTime;
   }
 }
 
