@@ -53,7 +53,7 @@ class Visualizer {
     this._clearViewports();
     this._drawVectorArray(GS.map, 5, 'white');
     this._drawCarCenter(GS.posX, GS.posY, 5, 'red');
-    this._drawCarBody(GS.carBody, 5, 'aqua');
+    this._drawCarBody(GS.carBody, 8, 'aqua');
     this._drawVectorArray([GS.movRay], 5, 'lime');
   }
 
@@ -62,18 +62,41 @@ class Visualizer {
     ctx.fillRect(0, 0, canvas.height, canvas.width);
   }
 
-  _drawCarBody(body, strokeWidth, strokeStyle) {
-    ctx.strokeWidth = strokeWidth;
-    ctx.strokeStyle = strokeStyle;
-    this._drawVectorArray(body, strokeWidth, strokeStyle);
-  }
-
   _drawCarCenter(posX, posY, strokeWidth, strokeColor) {
     ctx.strokeWidth = strokeWidth;
     ctx.strokeStyle = strokeColor;
     ctx.beginPath();
     ctx.arc(posX, posY, 12, 0, 2 * Math.PI);
     ctx.stroke();
+  }
+
+  _drawCarBody(body, strokeWidth, strokeStyle) {
+    ctx.strokeWidth = strokeWidth;
+    ctx.strokeStyle = strokeStyle;
+    console.log(body)
+
+    // draw a box by connecting all vector endpoints
+    for (let i=0; i<4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(body[i].x2, body[i].y2);
+      if (i===3) {ctx.lineTo(body[0].x2, body[0].y2);}
+      else {ctx.lineTo(body[i+1].x2, body[i+1].y2);}
+      ctx.stroke();
+    }
+
+    this._drawCarWheels(body, ctx.strokeWidth)
+  }
+
+  _drawCarWheels(wheels, strokeWidth) {
+    // skittles wheels
+    const colours = ['yellow', 'red', 'green', 'blue']
+    ctx.strokeWidth = strokeWidth;
+    for (let i=0; i<4; i++) {
+      ctx.strokeStyle = colours[i];
+      ctx.beginPath();
+      ctx.arc(wheels[i].x2, wheels[i].y2, 6, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
   }
 
   _drawVectorArray(vectors, lineWidth, strokeColor) {
@@ -119,8 +142,8 @@ class GameEngine {
     }
 
     const carBody = [];
-    const carWidth = 30;
-    const carLengthHyp = 50; // car length hypotenuse
+    const carWidth = 25;
+    const carLengthHyp = Math.sqrt((carWidth*carWidth)+(75*75)); // car length hypotenuse
 
     const RRRC = this.getRayRelativeToPosition(posX, posY, carWidth, movVec, Math.PI * 0.5);
     const RRLC = this.getRayRelativeToPosition(posX, posY, carWidth, movVec, Math.PI * 1.5);
@@ -129,8 +152,8 @@ class GameEngine {
 
     carBody.push(FRRC);
     carBody.push(FRLC);
-    carBody.push(RRRC);
     carBody.push(RRLC);
+    carBody.push(RRRC);
 
     return { posX, posY, carBody, movVec, speed };
   }
@@ -149,7 +172,8 @@ class GameEngine {
 }
 
 const canvas = document.querySelector('canvas');
-const ctx = canvas.getContext('2d'); const map = [
+const ctx = canvas.getContext('2d'); 
+const map = [
   // outer ring
   { x1: 50, y1: 750, x2: 50, y2: 250 },
   { x1: 50, y1: 250, x2: 75, y2: 175 },
@@ -198,7 +222,7 @@ async function main() {
     GS.carBody = newGs.carBody;
     GS.movVec = newGs.movVec;
     GS.speed = newGs.speed;
-    GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 75, GS.movVec, 0);
+    GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 95, GS.movVec, 0);
 
     View.nextFrame(GS);
   }
