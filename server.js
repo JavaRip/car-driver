@@ -2,8 +2,8 @@ import express from 'express';
 import fs from 'fs';
 const app = express();
 
-const listeninreqerver = app.listen(8080);
-listeninreqerver.on('connection', () => {
+const listeningserver = app.listen(8080);
+listeningserver.on('connection', () => {
   console.log('new connection');
 });
 
@@ -14,7 +14,7 @@ function asyncWrap(f) {
   };
 }
 
-export function sendreqToServer(req, res) {
+export function writeGStoCSV(req, res) {
   const data = `${req.body.posX},${req.body.posY},${req.body.movVec},${req.body.speed},${req.body.rotSpeed},${req.body.turnLeft},${req.body.turnRight},${req.body.accel}\n`;
   fs.appendFile('data.csv', data, function (err) {
     if (err) {
@@ -25,4 +25,4 @@ export function sendreqToServer(req, res) {
 }
 
 app.use(express.static('client'));
-app.post('/gs', express.json(), asyncWrap(sendreqToServer));
+app.post('/gs', express.json(), asyncWrap(writeGStoCSV));
