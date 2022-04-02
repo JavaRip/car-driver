@@ -17,19 +17,17 @@ class Controller {
     return { turnLeft, turnRight, accel };
   }
 
-    getMrRoboto(colRays) {
+  getMrRoboto(colRays) {
     let turnLeft = false;
     let turnRight = false;
-    let accel = true;
-
-    console.log(colRays);
+    const accel = true;
 
     if (colRays === undefined) {
       return { turnLeft, turnRight, accel };
     }
-    // Left > Right
 
-    if(colRays[0].intersect.distance > colRays[1].intersect.distance) {
+    // Left > Right
+    if (colRays[0].intersect.distance > colRays[1].intersect.distance) {
       turnLeft = true;
     }
 
@@ -57,10 +55,6 @@ class Controller {
         break;
     }
   }
-}
-
-class RobotCar {
-  
 }
 
 class GameState {
@@ -186,8 +180,13 @@ class GameEngine {
 
     const colRays = [];
 
-    colRays.push(this.getRelativeRay(FRLC.x2, FRLC.y2, 200, movVec, tau * 0.875));
-    colRays.push(this.getRelativeRay(FRRC.x2, FRRC.y2, 200, movVec, tau * 0.125));
+    // winner winner
+    colRays.push(this.getRelativeRay(FRLC.x2, FRLC.y2, 200, movVec, tau * 0.850));
+    colRays.push(this.getRelativeRay(FRRC.x2, FRRC.y2, 200, movVec, tau * 0.150));
+
+    // loser loser
+    // colRays.push(this.getRelativeRay(FRLC.x2, FRLC.y2, 200, movVec, tau * 0.875));
+    // colRays.push(this.getRelativeRay(FRRC.x2, FRRC.y2, 200, movVec, tau * 0.125));
 
     this._detectIntersects(posX, posY, colRays, map);
 
@@ -312,11 +311,12 @@ const View = new Visualizer();
 const Engine = new GameEngine();
 const BrowserController = new Controller();
 
+// eslint-disable-next-line promise/param-names
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function main() {
   for (let i = 0; i < Infinity; i += 1) {
-    // if (GS.bodyIntersects.length > 0) GS = new GameState(250, 150, map, 0, 0);
+    if (GS.bodyIntersects.length > 0) GS = new GameState(250, 150, map, 0, 0);
     await delay(32);
 
     // const inputs = BrowserController.getInput();
