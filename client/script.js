@@ -50,7 +50,10 @@ class Visualizer {
   nextFrame(GS) {
     this._clearViewports();
     this._drawVectorArray(GS.map, 5, 'white');
-    this._drawCarCenter(GS.posX, GS.posY, 5, 'red');
+    this._drawPointArray([{ posX: GS.posX, posY: GS.posY }], 5, 'red');
+    const intersects = GS.colRays.map(ray => ray.intersect);
+
+    this._drawPointArray(intersects, 5, 'hotpink');
     this._drawCarBody(GS.carBody, 5, 'aqua');
     this._drawVectorArray(GS.colRays, 5, 'lime');
   }
@@ -71,12 +74,15 @@ class Visualizer {
     ctx.stroke();
   }
 
-  _drawCarCenter(posX, posY, strokeWidth, strokeColor) {
+  _drawPointArray(points, strokeWidth, strokeColor) {
     ctx.strokeWidth = strokeWidth;
     ctx.strokeStyle = strokeColor;
-    ctx.beginPath();
-    ctx.arc(posX, posY, 12, 0, 2 * Math.PI);
-    ctx.stroke();
+
+    for (const point of points) {
+      ctx.beginPath();
+      ctx.arc(point.posX, point.posY, 12, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
   }
 
   _drawVectorArray(vectors, lineWidth, strokeColor) {
@@ -92,7 +98,7 @@ class Visualizer {
 }
 
 class GameEngine {
-  moveCar(posX, posY, movVec, speed, inputs) {
+  moveCar(posX, posY, movVec, speed, inputs, map) {
     const tau = Math.PI * 2;
     const rotationSpeed = 0.1;
     const accelRate = 0.3;
@@ -142,7 +148,44 @@ class GameEngine {
     colRays.push(this.getRayRelativeToPosition(FRLC.x2, FRLC.y2, 200, movVec, tau * 0.875));
     colRays.push(this.getRayRelativeToPosition(FRRC.x2, FRRC.y2, 200, movVec, tau * 0.125));
 
+    this._detectIntersects(posX, posY, colRays, map);
+
     return { posX, posY, carBody, colRays, movVec, speed };
+  }
+
+  _detectIntersects(posX, posY, castRays, map) {
+    for (const ray of castRays) {
+      // placeholder intersect distance is infinite, any intersect is shorter than none
+      ray.intersect = { distance: Infinity, posX: null, posY: null };
+      for (const wall of map) {
+        const newIntersect = this._findIntersect(ray, wall);
+        newIntersect.distance =
+          Math.hypot(posX - newIntersect.posX, posY - newIntersect.posY);
+        if (newIntersect.distance < ray.intersect.distance) {
+          ray.intersect = newIntersect;
+        }
+      }
+    }
+  }
+
+  _findIntersect(ray, wall) {
+    const denominator =
+      ((wall.x1 - wall.x2) * (ray.y1 - ray.y2) - (wall.y1 - wall.y2) * (ray.x1 - ray.x2));
+    const t =
+      ((ray.x2 - ray.x1) * (wall.y1 - ray.y1) - (ray.y2 - ray.y1) * (wall.x1 - ray.x1)) /
+      denominator;
+    const u =
+      ((wall.x2 - wall.x1) * (wall.y1 - ray.y1) - (wall.y2 - wall.y1) * (wall.x1 - ray.x1)) /
+      denominator;
+
+    // if points do intersect calculate where
+    if (t > 0 && t < 1 && u > 0) {
+      const intersectOnWallX = wall.x1 + t * (wall.x2 - wall.x1);
+      const intersectOnWallY = wall.y1 + t * (wall.y2 - wall.y1);
+      return { posX: intersectOnWallX, posY: intersectOnWallY };
+    } else {
+      return { posX: Infinity, posY: Infinity };
+    }
   }
 
   getRayRelativeToPosition(posX, posY, rayLength, movVec, angleOffset) {
@@ -205,7 +248,7 @@ async function main() {
 
     const inputs = BrowserController.getInput();
 
-    const newGs = Engine.moveCar(GS.posX, GS.posY, GS.movVec, GS.speed, inputs);
+    const newGs = Engine.moveCar(GS.posX, GS.posY, GS.movVec, GS.speed, inputs, GS.map);
     GS.posX = newGs.posX;
     GS.posY = newGs.posY;
     GS.carBody = newGs.carBody;
