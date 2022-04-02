@@ -1,14 +1,9 @@
-'use strict';
-
-const delay = ms => new Promise(res => setTimeout(res, ms));
-
 class Controller {
   constructor() {
-    // keeps state of current inputs
-
     this.turnLeft = false;
     this.turnRight = false;
     this.accel = false;
+    this.colRays = []; // rays cast to detect collision
     this.parseInputBound = this._parseInput.bind(this);
     document.addEventListener('keydown', this.parseInputBound);
     document.addEventListener('keyup', this.parseInputBound);
@@ -43,6 +38,7 @@ class GameState {
   constructor(posX, posY, map, movVec, speed) {
     this.posX = posX;
     this.posY = posY;
+    this.body = [];
     this.movVec = movVec;
     this.movRay = null;
     this.speed = speed;
@@ -51,60 +47,35 @@ class GameState {
 }
 
 class Visualizer {
-  drawMap(level) {
-    this._drawVectorArray(level, 5, 'white');
+  nextFrame(GS) {
+    this._clearViewports();
+    this._drawVectorArray(GS.map, 5, 'white');
+    this._drawCarCenter(GS.posX, GS.posY, 5, 'red');
+    this._drawCarBody(GS.carBody, 5, 'aqua');
+    this._drawVectorArray(GS.colRays, 5, 'lime');
   }
 
-  drawCar(posX, posY, movVec, movRay) {
-    this._drawCarBody(posX, posY, movVec, 'red');
-    this._drawVectorArray([movRay], 5, 'lime');
-  }
-
-  clearViewports() {
+  _clearViewports() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.height, canvas.width);
   }
 
-  _drawCarBody(posX, posY, movVec, strokeColor) {
-    const offset = 0.4;
+  _drawCarBody(body, strokeWidth, strokeStyle) {
+    ctx.strokeWidth = strokeWidth;
+    ctx.strokeStyle = strokeStyle;
+    ctx.beginPath();
+    for (const point of body) {
+      ctx.lineTo(point.x2, point.y2);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
 
+  _drawCarCenter(posX, posY, strokeWidth, strokeColor) {
+    ctx.strokeWidth = strokeWidth;
     ctx.strokeStyle = strokeColor;
-    ctx.fillStyle = 'blue';
-    ctx.lineWidth = 5;
     ctx.beginPath();
-    ctx.arc(posX, posY, 10, 0, 2 * Math.PI);
-    ctx.stroke();
-
-    ctx.strokeStyle = 'gold';
-
-    ctx.beginPath();
-    const FRCX = posX + (Math.cos(movVec + offset) * 50);
-    const FRCY = posY + (Math.sin(movVec + offset) * 50);
-    ctx.arc(FRCX, FRCY, 3, 0, 2 * Math.PI);
-    ctx.stroke();
-
-    ctx.strokeStyle = 'aqua';
-
-    ctx.beginPath();
-    const FLCX = posX + (Math.cos(movVec + -offset) * 50);
-    const FLCY = posY + (Math.sin(movVec + -offset) * 50);
-    ctx.arc(FLCX, FLCY, 3, 0, 2 * Math.PI);
-    ctx.stroke();
-
-    ctx.strokeStyle = 'crimson';
-
-    ctx.beginPath();
-    const RLCX = posX - (Math.cos(movVec + offset) * 50);
-    const RLCY = posY - (Math.sin(movVec + offset) * 50);
-    ctx.arc(RLCX, RLCY, 3, 0, 2 * Math.PI);
-    ctx.stroke();
-
-    ctx.strokeStyle = 'indigo';
-
-    ctx.beginPath();
-    const RRCX = posX - (Math.cos(movVec + -offset) * 50);
-    const RRCY = posY - (Math.sin(movVec + -offset) * 50);
-    ctx.arc(RRCX, RRCY, 3, 0, 2 * Math.PI);
+    ctx.arc(posX, posY, 12, 0, 2 * Math.PI);
     ctx.stroke();
   }
 
@@ -121,27 +92,62 @@ class Visualizer {
 }
 
 class GameEngine {
-  moveCar(posX, posY, movVec, speed, turn, accel) {
+  moveCar(posX, posY, movVec, speed, inputs) {
     const tau = Math.PI * 2;
-    const rotationSpeed = 5;
+    const rotationSpeed = 0.1;
+    const accelRate = 0.3;
+    const deccelRate = 1;
+    const maxSpeed = 10;
 
-    // if car is accelerating increase speed
-    speed += accel;
+    if (inputs.turnLeft === true) {
+      movVec = (movVec - rotationSpeed) % tau;
+    }
 
-    // move in direction of travel
-    posX += speed * Math.cos(movVec);
-    posY += speed * Math.sin(movVec);
+    if (inputs.turnRight === true) {
+      movVec = (movVec + rotationSpeed) % tau;
+    }
 
-    // rotate moveVec
-    movVec = (movVec + rotationSpeed) % tau;
+    if (inputs.accel === true) {
+      if (speed + accelRate <= maxSpeed) speed += accelRate;
+      else speed = maxSpeed;
 
-    return { posX, posY, movVec, speed };
+      posX += Math.cos(movVec) * speed;
+      posY += Math.sin(movVec) * speed;
+    } else {
+      if (speed - deccelRate > 0) speed -= accelRate;
+      else speed = 0;
+
+      posX += Math.cos(movVec) * speed;
+      posY += Math.sin(movVec) * speed;
+    }
+
+    const carBody = [];
+    const carWidth = 30;
+    const carLength = 100;
+    const carHypot = Math.hypot(carWidth, carLength);
+    const angle = Math.acos(carLength / carHypot);
+
+    const RRRC = this.getRayRelativeToPosition(posX, posY, carWidth, movVec, tau * 0.25);
+    const RRLC = this.getRayRelativeToPosition(posX, posY, carWidth, movVec, tau * 1.75);
+    const FRRC = this.getRayRelativeToPosition(posX, posY, carHypot, movVec, angle);
+    const FRLC = this.getRayRelativeToPosition(posX, posY, carHypot, movVec, tau - angle);
+
+    carBody.push(RRRC);
+    carBody.push(RRLC);
+    carBody.push(FRLC);
+    carBody.push(FRRC);
+
+    const colRays = [];
+
+    colRays.push(this.getRayRelativeToPosition(FRLC.x2, FRLC.y2, 200, movVec, tau * 0.875));
+    colRays.push(this.getRayRelativeToPosition(FRRC.x2, FRRC.y2, 200, movVec, tau * 0.125));
+
+    return { posX, posY, carBody, colRays, movVec, speed };
   }
 
-  getRayRelativeToPosition(posX, posY, movVec, angleOffset) {
+  getRayRelativeToPosition(posX, posY, rayLength, movVec, angleOffset) {
     // without offset, cast the ray directly down the direction the player is facing
     // use offset to cast ray relative to this position. Offset is in radians
-    const rayLength = 75;
     const rayOffsetX = Math.cos(movVec + angleOffset);
     const rayOffsetY = Math.sin(movVec + angleOffset);
     const rayExtendedX = rayOffsetX * rayLength;
@@ -153,9 +159,7 @@ class GameEngine {
 }
 
 const canvas = document.querySelector('canvas');
-const ctx = canvas.getContext('2d');
-const map = [
-  // { x1: , y1: , x2: , y2:  },
+const ctx = canvas.getContext('2d'); const map = [
   // outer ring
   { x1: 50, y1: 750, x2: 50, y2: 250 },
   { x1: 50, y1: 250, x2: 75, y2: 175 },
@@ -187,21 +191,30 @@ const map = [
   { x1: 650, y1: 250, x2: 350, y2: 250 },
   { x1: 350, y1: 250, x2: 250, y2: 350 },
 ];
-const GS = new GameState(canvas.height / 2, canvas.width / 2, map, 1, 10);
+
+const GS = new GameState(canvas.height / 2, canvas.width / 2, map, 0, 10);
 const View = new Visualizer();
 const Engine = new GameEngine();
 const BrowserController = new Controller();
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
 async function main() {
-  const directionPressed = 0;
-  for (let i = 0; i < 1000; i += directionPressed) {
-    await delay(200);
-    BrowserController.getInput();
-    GS.movVec = ((i * 2 % 360) * Math.PI) / (45);
-    View.clearViewports();
-    View.drawMap(GS.map, GS.posX, GS.posY, [], GS.movVec);
-    GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, GS.movVec, 0);
-    View.drawCar(GS.posX, GS.posY, GS.movVec, GS.movRay);
+  for (let i = 0; i < Infinity; i += 1) {
+    await delay(16);
+
+    const inputs = BrowserController.getInput();
+
+    const newGs = Engine.moveCar(GS.posX, GS.posY, GS.movVec, GS.speed, inputs);
+    GS.posX = newGs.posX;
+    GS.posY = newGs.posY;
+    GS.carBody = newGs.carBody;
+    GS.movVec = newGs.movVec;
+    GS.speed = newGs.speed;
+    GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 75, GS.movVec, 0);
+    GS.colRays = newGs.colRays;
+
+    View.nextFrame(GS);
   }
 }
 
