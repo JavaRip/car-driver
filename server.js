@@ -3,9 +3,6 @@ import fs from 'fs';
 const app = express();
 
 const listeningserver = app.listen(8080);
-listeningserver.on('connection', () => {
-  console.log('new connection');
-});
 
 function asyncWrap(f) {
   return (req, res, next) => {
@@ -15,7 +12,7 @@ function asyncWrap(f) {
 }
 
 export function writeGStoCSV(req, res) {
-  const data = `${req.body.posX},${req.body.posY},${req.body.movVec},${req.body.speed},${req.body.rotSpeed},${req.body.turnLeft},${req.body.turnRight},${req.body.accel}\n`;
+  const data = `${req.body.posX},${req.body.posY},${req.body.movVec},${req.body.speed},${req.body.turnLeft},${req.body.turnRight},${req.body.accel}\n`;
   fs.appendFile('data.csv', data, function (err) {
     if (err) {
       console.log(err);
