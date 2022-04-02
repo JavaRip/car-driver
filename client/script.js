@@ -201,24 +201,8 @@ class GSLogger {
     this.gamestates = []
   }
 
-  postState(GS, inputs) {
-    const data = {
-      posX: GS.posX,
-      posY: GS.posY,
-      map: GS.map,
-      movVec: GS.movVec,
-      speed: GS.speed, 
-      rotSpeed: GS.rotSpeed,
-      turnLeft: inputs.turnLeft,
-      turnRight: inputs.turnRight,
-      accel: inputs.accel,
-    }
+  async postState(GS, inputs) {
 
-    const response = await fetch('gs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
   }
 
   getLength() {
@@ -239,6 +223,27 @@ async function main() {
     await delay(16);
 
     const inputs = BrowserController.getInput();
+    const data = {
+      posX: GS.posX,
+      posY: GS.posY,
+      map: GS.map,
+      movVec: GS.movVec,
+      speed: GS.speed, 
+      rotSpeed: GS.rotSpeed,
+      turnLeft: inputs.turnLeft,
+      turnRight: inputs.turnRight,
+      accel: inputs.accel,
+    }
+
+    try {
+      await fetch('gs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    } catch (e) {
+      console.log(e)
+    }
 
     const newGs = Engine.moveCar(GS.posX, GS.posY, GS.movVec, GS.speed, inputs);
     GS.posX = newGs.posX;
@@ -249,7 +254,7 @@ async function main() {
     GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 75, GS.movVec, 0);
     GS.colRays = newGs.colRays;
 
-    GSLog.postState(GS, inputs);
+    
 
     View.nextFrame(GS);
   }
