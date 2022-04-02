@@ -276,7 +276,7 @@ const ctx = canvas.getContext('2d'); const map = [
   { x1: 350, y1: 250, x2: 250, y2: 350 },
 ];
 
-const GS = new GameState(canvas.height / 2, canvas.width / 2, map, 0, 10);
+const GS = new GameState(250, 150, map, 0, 0);
 const View = new Visualizer();
 const Engine = new GameEngine();
 const BrowserController = new Controller();
