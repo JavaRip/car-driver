@@ -110,7 +110,6 @@ class Visualizer {
     }
   }
 }
-var fps = 60
 
 class GameEngine {
   moveCar(posX, posY, movVec, speed, inputs) {
@@ -213,26 +212,44 @@ const View = new Visualizer();
 const Engine = new GameEngine();
 const BrowserController = new Controller();
 
+const framerate = 16
 async function main() {
-  //var startTime = Date().geTime();
+
   //setInterval(function () {element.innerHTML += "Hello"}, 1000);
-
-    setInterval(function () {
-
+  let count = 0;
+  
+  while(true){
+    const startTime = new Date(); 
     const inputs = BrowserController.getInput();
-
     const newGs = Engine.moveCar(GS.posX, GS.posY, GS.movVec, GS.speed, inputs);
+
+    await delay();
+
+
     GS.posX = newGs.posX;
     GS.posY = newGs.posY;
     GS.carBody = newGs.carBody;
     GS.movVec = newGs.movVec;
     GS.speed = newGs.speed;
-    GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 95, GS.movVec, 0);
+    GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 75, GS.movVec, 0);
+    GS.colRays = newGs.colRays;
+
+    const endTime = new Date();
+    let frameTime = endTime.getTime() - startTime.getTime();
+
+    if (frameTime < 16) {
+      framerate += 16
+    }
+    if (frameTime > 16 && count != 0) {
+      framerate -= 16
+    }
+    console.log(frameTime)
     View.nextFrame(GS);
 
-    //Modify this to change framerate. (1000/TargetFPS)
-  }, 1000/50);
+    count += 1;
   }
+    
+}
 
 
 main();
