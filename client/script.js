@@ -17,6 +17,30 @@ class Controller {
     return { turnLeft, turnRight, accel };
   }
 
+    getMrRoboto(colRays) {
+    let turnLeft = false;
+    let turnRight = false;
+    let accel = true;
+
+    console.log(colRays);
+
+    if (colRays === undefined) {
+      return { turnLeft, turnRight, accel };
+    }
+    // Left > Right
+
+    if(colRays[0].intersect.distance > colRays[1].intersect.distance) {
+      turnLeft = true;
+    }
+
+    // Left < Right
+    if (colRays[0].intersect.distance < colRays[1].intersect.distance) {
+      turnRight = true;
+    }
+
+    return { turnLeft, turnRight, accel };
+  }
+
   _parseInput(event) {
     switch (event.key) {
       case 'a':
@@ -33,6 +57,10 @@ class Controller {
         break;
     }
   }
+}
+
+class RobotCar {
+  
 }
 
 class GameState {
@@ -288,10 +316,13 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function main() {
   for (let i = 0; i < Infinity; i += 1) {
-    if (GS.bodyIntersects.length > 0) GS = new GameState(250, 150, map, 0, 0);
+    // if (GS.bodyIntersects.length > 0) GS = new GameState(250, 150, map, 0, 0);
     await delay(32);
 
-    const inputs = BrowserController.getInput();
+    // const inputs = BrowserController.getInput();
+    const inputs = BrowserController.getMrRoboto(GS.colRays);
+
+
     const data = {
       posX: GS.posX,
       posY: GS.posY,
