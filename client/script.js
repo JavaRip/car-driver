@@ -1,11 +1,9 @@
-
-const delay = ms => new Promise(res => setTimeout(res, ms));
-
 class Controller {
   constructor() {
     this.turnLeft = false;
     this.turnRight = false;
     this.accel = false;
+    this.colRays = []; // rays cast to detect collision
     this.parseInputBound = this._parseInput.bind(this);
     document.addEventListener('keydown', this.parseInputBound);
     document.addEventListener('keyup', this.parseInputBound);
@@ -54,7 +52,7 @@ class Visualizer {
     this._drawVectorArray(GS.map, 5, 'white');
     this._drawCarCenter(GS.posX, GS.posY, 5, 'red');
     this._drawCarBody(GS.carBody, 5, 'aqua');
-    this._drawVectorArray([GS.movRay], 5, 'lime');
+    this._drawVectorArray(GS.colRays, 5, 'lime');
   }
 
   _clearViewports() {
@@ -65,7 +63,12 @@ class Visualizer {
   _drawCarBody(body, strokeWidth, strokeStyle) {
     ctx.strokeWidth = strokeWidth;
     ctx.strokeStyle = strokeStyle;
-    this._drawVectorArray(body, strokeWidth, strokeStyle);
+    ctx.beginPath();
+    for (const point of body) {
+      ctx.lineTo(point.x2, point.y2);
+    }
+    ctx.closePath();
+    ctx.stroke();
   }
 
   _drawCarCenter(posX, posY, strokeWidth, strokeColor) {
@@ -120,19 +123,26 @@ class GameEngine {
 
     const carBody = [];
     const carWidth = 30;
-    const carLengthHyp = 50; // car length hypotenuse
+    const carLength = 100;
+    const carHypot = Math.hypot(carWidth, carLength);
+    const angle = Math.acos(carLength / carHypot);
 
-    const RRRC = this.getRayRelativeToPosition(posX, posY, carWidth, movVec, Math.PI * 0.5);
-    const RRLC = this.getRayRelativeToPosition(posX, posY, carWidth, movVec, Math.PI * 1.5);
-    const FRRC = this.getRayRelativeToPosition(posX, posY, carLengthHyp, movVec, Math.PI * 0.1);
-    const FRLC = this.getRayRelativeToPosition(posX, posY, carLengthHyp, movVec, Math.PI * 1.9);
+    const RRRC = this.getRayRelativeToPosition(posX, posY, carWidth, movVec, tau * 0.25);
+    const RRLC = this.getRayRelativeToPosition(posX, posY, carWidth, movVec, tau * 1.75);
+    const FRRC = this.getRayRelativeToPosition(posX, posY, carHypot, movVec, angle);
+    const FRLC = this.getRayRelativeToPosition(posX, posY, carHypot, movVec, tau - angle);
 
-    carBody.push(FRRC);
-    carBody.push(FRLC);
     carBody.push(RRRC);
     carBody.push(RRLC);
+    carBody.push(FRLC);
+    carBody.push(FRRC);
 
-    return { posX, posY, carBody, movVec, speed };
+    const colRays = [];
+
+    colRays.push(this.getRayRelativeToPosition(FRLC.x2, FRLC.y2, 200, movVec, tau * 0.875));
+    colRays.push(this.getRayRelativeToPosition(FRRC.x2, FRRC.y2, 200, movVec, tau * 0.125));
+
+    return { posX, posY, carBody, colRays, movVec, speed };
   }
 
   getRayRelativeToPosition(posX, posY, rayLength, movVec, angleOffset) {
@@ -182,14 +192,17 @@ const ctx = canvas.getContext('2d'); const map = [
   { x1: 350, y1: 250, x2: 250, y2: 350 },
 ];
 
-const GS = new GameState(canvas.height / 2, canvas.width / 2, map, (Math.PI * 0), 10);
+const GS = new GameState(canvas.height / 2, canvas.width / 2, map, 0, 10);
 const View = new Visualizer();
 const Engine = new GameEngine();
 const BrowserController = new Controller();
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
 async function main() {
   for (let i = 0; i < Infinity; i += 1) {
     await delay(16);
+
     const inputs = BrowserController.getInput();
 
     const newGs = Engine.moveCar(GS.posX, GS.posY, GS.movVec, GS.speed, inputs);
@@ -199,6 +212,7 @@ async function main() {
     GS.movVec = newGs.movVec;
     GS.speed = newGs.speed;
     GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 75, GS.movVec, 0);
+    GS.colRays = newGs.colRays;
 
     View.nextFrame(GS);
   }
