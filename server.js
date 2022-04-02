@@ -2,7 +2,10 @@ import express from 'express';
 import fs from 'fs';
 const app = express();
 
-const listeningServer = app.listen(8080);
+const listeninreqerver = app.listen(8080);
+listeninreqerver.on('connection', () => {
+  console.log('new connection');
+});
 
 function asyncWrap(f) {
   return (req, res, next) => {
@@ -11,11 +14,15 @@ function asyncWrap(f) {
   };
 }
 
-export async function sendGSToServer(GS) {
-    const data = GS.values()
-    await fs.appendFile(`data.csv`, data, 'utf8')
+export function sendreqToServer(req, res) {
+  const data = `${req.body.posX},${req.body.posY},${req.body.movVec},${req.body.speed},${req.body.rotSpeed},${req.body.turnLeft},${req.body.turnRight},${req.body.accel}\n`;
+  fs.appendFile('data.csv', data, function (err) {
+    if (err) {
+      console.log(err);
+    }
+  });
+  res.json();
 }
 
 app.use(express.static('client'));
-app.post('/gs', express.json(), asyncWrap(writeGSToCSV()))
-
+app.post('/gs', express.json(), asyncWrap(sendreqToServer));

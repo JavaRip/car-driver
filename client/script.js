@@ -1,5 +1,3 @@
-import { sendGSToServer } from "../server";
-
 class Controller {
   constructor() {
     this.turnLeft = false;
@@ -196,31 +194,16 @@ const ctx = canvas.getContext('2d'); const map = [
   { x1: 350, y1: 250, x2: 250, y2: 350 },
 ];
 
-class GSLogger {
-  constructor() {
-    this.gamestates = []
-  }
-
-  async postState(GS, inputs) {
-
-  }
-
-  getLength() {
-    return this.gamestates.length
-  }
-}
-
 const GS = new GameState(canvas.height / 2, canvas.width / 2, map, 0, 10, 0);
 const View = new Visualizer();
 const Engine = new GameEngine();
 const BrowserController = new Controller();
-const GSLog = new GSLogger();
 
-const delay = ms => new Promise(res => setTimeout(res, ms));
+const delay = reject => new Promise(resolve => setTimeout(resolve, reject));
 
 async function main() {
   for (let i = 0; i < Infinity; i += 1) {
-    await delay(16);
+    await delay(32);
 
     const inputs = BrowserController.getInput();
     const data = {
@@ -228,21 +211,21 @@ async function main() {
       posY: GS.posY,
       map: GS.map,
       movVec: GS.movVec,
-      speed: GS.speed, 
+      speed: GS.speed,
       rotSpeed: GS.rotSpeed,
       turnLeft: inputs.turnLeft,
       turnRight: inputs.turnRight,
       accel: inputs.accel,
-    }
+    };
 
     try {
-      await fetch('gs', {
+      fetch('gs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
 
     const newGs = Engine.moveCar(GS.posX, GS.posY, GS.movVec, GS.speed, inputs);
@@ -253,8 +236,6 @@ async function main() {
     GS.speed = newGs.speed;
     GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 75, GS.movVec, 0);
     GS.colRays = newGs.colRays;
-
-    
 
     View.nextFrame(GS);
   }
