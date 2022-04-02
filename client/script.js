@@ -13,6 +13,7 @@ class Controller {
     const turnLeft = this.turnLeft;
     const turnRight = this.turnRight;
     const accel = this.accel;
+
     return { turnLeft, turnRight, accel };
   }
 
@@ -35,7 +36,7 @@ class Controller {
 }
 
 class GameState {
-  constructor(posX, posY, map, movVec, speed) {
+  constructor(posX, posY, map, movVec, speed, rotSpeed) {
     this.posX = posX;
     this.posY = posY;
     this.body = [];
@@ -44,6 +45,7 @@ class GameState {
     this.movVec = movVec;
     this.movRay = null;
     this.speed = speed;
+    this.rotSpeed = rotSpeed;
     this.map = map;
   }
 }
@@ -277,6 +279,7 @@ const ctx = canvas.getContext('2d'); const map = [
 ];
 
 let GS = new GameState(250, 150, map, 0, 0);
+
 const View = new Visualizer();
 const Engine = new GameEngine();
 const BrowserController = new Controller();
@@ -286,9 +289,30 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 async function main() {
   for (let i = 0; i < Infinity; i += 1) {
     if (GS.bodyIntersects.length > 0) GS = new GameState(250, 150, map, 0, 0);
-    await delay(16);
+    await delay(32);
 
     const inputs = BrowserController.getInput();
+    const data = {
+      posX: GS.posX,
+      posY: GS.posY,
+      map: GS.map,
+      movVec: GS.movVec,
+      speed: GS.speed,
+      rotSpeed: GS.rotSpeed,
+      turnLeft: inputs.turnLeft,
+      turnRight: inputs.turnRight,
+      accel: inputs.accel,
+    };
+
+    try {
+      fetch('gs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    } catch (e) {
+      console.log(e);
+    }
 
     const newGs = Engine.moveCar(GS.posX, GS.posY, GS.movVec, GS.speed, inputs, GS.map);
     GS.posX = newGs.posX;
