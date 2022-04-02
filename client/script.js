@@ -199,7 +199,7 @@ const View = new Visualizer();
 const Engine = new GameEngine();
 const BrowserController = new Controller();
 
-const delay = reject => new Promise(resolve => setTimeout(resolve, reject));
+const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function main() {
   for (let i = 0; i < Infinity; i += 1) {
