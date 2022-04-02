@@ -39,6 +39,8 @@ class GameState {
     this.posX = posX;
     this.posY = posY;
     this.body = [];
+    this.bodyRays = [];
+    this.bodyIntersects = [];
     this.movVec = movVec;
     this.movRay = null;
     this.speed = speed;
@@ -53,8 +55,9 @@ class Visualizer {
     this._drawPointArray([{ posX: GS.posX, posY: GS.posY }], 5, 'red');
     const intersects = GS.colRays.map(ray => ray.intersect);
 
+    this._drawPointArray(GS.bodyIntersects, 5, 'crimson');
     this._drawPointArray(intersects, 5, 'hotpink');
-    this._drawCarBody(GS.carBody, 5, 'aqua');
+    this._drawVectorArray(GS.bodyRays, 5, 'aqua');
     this._drawVectorArray(GS.colRays, 5, 'lime');
   }
 
@@ -103,7 +106,7 @@ class GameEngine {
     const rotationSpeed = 0.1;
     const accelRate = 0.3;
     const deccelRate = 1;
-    const maxSpeed = 10;
+    const maxSpeed = 15;
 
     if (inputs.turnLeft === true) {
       movVec = (movVec - rotationSpeed) % tau;
@@ -133,24 +136,62 @@ class GameEngine {
     const carHypot = Math.hypot(carWidth, carLength);
     const angle = Math.acos(carLength / carHypot);
 
-    const RRRC = this.getRayRelativeToPosition(posX, posY, carWidth, movVec, tau * 0.25);
-    const RRLC = this.getRayRelativeToPosition(posX, posY, carWidth, movVec, tau * 1.75);
-    const FRRC = this.getRayRelativeToPosition(posX, posY, carHypot, movVec, angle);
-    const FRLC = this.getRayRelativeToPosition(posX, posY, carHypot, movVec, tau - angle);
+    const RRRC = this.getRelativeRay(posX, posY, carWidth, movVec, tau * 0.25);
+    const RRLC = this.getRelativeRay(posX, posY, carWidth, movVec, tau * 1.75);
+    const FRRC = this.getRelativeRay(posX, posY, carHypot, movVec, angle);
+    const FRLC = this.getRelativeRay(posX, posY, carHypot, movVec, tau - angle);
 
     carBody.push(RRRC);
     carBody.push(RRLC);
     carBody.push(FRLC);
     carBody.push(FRRC);
 
+    const bodyRays = [];
+    bodyRays.push({ x1: RRRC.x2, y1: RRRC.y2, x2: FRRC.x2, y2: FRRC.y2 });
+    bodyRays.push({ x1: RRRC.x2, y1: RRRC.y2, x2: RRLC.x2, y2: RRLC.y2 });
+    bodyRays.push({ x1: FRRC.x2, y1: FRRC.y2, x2: FRLC.x2, y2: FRLC.y2 });
+    bodyRays.push({ x1: RRLC.x2, y1: RRLC.y2, x2: FRLC.x2, y2: FRLC.y2 });
+
+    const bodyIntersects = this._getBodyCollisions(map, bodyRays);
+
     const colRays = [];
 
-    colRays.push(this.getRayRelativeToPosition(FRLC.x2, FRLC.y2, 200, movVec, tau * 0.875));
-    colRays.push(this.getRayRelativeToPosition(FRRC.x2, FRRC.y2, 200, movVec, tau * 0.125));
+    colRays.push(this.getRelativeRay(FRLC.x2, FRLC.y2, 200, movVec, tau * 0.875));
+    colRays.push(this.getRelativeRay(FRRC.x2, FRRC.y2, 200, movVec, tau * 0.125));
 
     this._detectIntersects(posX, posY, colRays, map);
 
-    return { posX, posY, carBody, colRays, movVec, speed };
+    return { posX, posY, carBody, colRays, movVec, speed, bodyRays, bodyIntersects };
+  }
+
+  _getBodyCollisions(map, rays) {
+    const intersects = [];
+    for (const ray of rays) {
+      let intersect = { distance: Infinity, posX: null, posY: null };
+      for (const wall of map) {
+        const newIntersect = this._findIntersect(ray, wall);
+        newIntersect.distance =
+          Math.hypot(ray.x1 - newIntersect.posX, ray.y1 - newIntersect.posY);
+
+        if (newIntersect.distance < intersect.distance) {
+          intersect = newIntersect;
+        }
+      }
+
+      if (intersect.posX >= ray.x1 && intersect.posX <= ray.x2 && intersect.posY >= ray.y1 && intersect.posY <= ray.y2) {
+        intersects.push(intersect);
+      }
+      if (intersect.posX <= ray.x1 && intersect.posX >= ray.x2 && intersect.posY <= ray.y1 && intersect.posY >= ray.y2) {
+        intersects.push(intersect);
+      }
+      if (intersect.posX <= ray.x1 && intersect.posX >= ray.x2 && intersect.posY >= ray.y1 && intersect.posY <= ray.y2) {
+        intersects.push(intersect);
+      }
+      if (intersect.posX >= ray.x1 && intersect.posX <= ray.x2 && intersect.posY <= ray.y1 && intersect.posY >= ray.y2) {
+        intersects.push(intersect);
+      }
+    }
+    return intersects;
   }
 
   _detectIntersects(posX, posY, castRays, map) {
@@ -188,7 +229,7 @@ class GameEngine {
     }
   }
 
-  getRayRelativeToPosition(posX, posY, rayLength, movVec, angleOffset) {
+  getRelativeRay(posX, posY, rayLength, movVec, angleOffset) {
     // without offset, cast the ray directly down the direction the player is facing
     // use offset to cast ray relative to this position. Offset is in radians
     const rayOffsetX = Math.cos(movVec + angleOffset);
@@ -254,8 +295,10 @@ async function main() {
     GS.carBody = newGs.carBody;
     GS.movVec = newGs.movVec;
     GS.speed = newGs.speed;
-    GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 75, GS.movVec, 0);
+    GS.bodyRays = newGs.bodyRays;
+    GS.movRay = Engine.getRelativeRay(GS.posX, GS.posY, 75, GS.movVec, 0);
     GS.colRays = newGs.colRays;
+    GS.bodyIntersects = newGs.bodyIntersects;
 
     View.nextFrame(GS);
   }
