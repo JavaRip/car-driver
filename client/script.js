@@ -199,9 +199,10 @@ class GSLogger {
     this.gamestates = []
   }
 
-  postState(gameState) {
+  postState(gameState, inputs) {
     // this.gamestates.push(this.gamestates)
-    // post to the server
+
+    // post this to the server
   }
 
   getLength() {
@@ -232,11 +233,7 @@ async function main() {
     GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 75, GS.movVec, 0);
     GS.colRays = newGs.colRays;
 
-    GSLog.postState(GS);
-
-    if (i % 60 == 0) {
-      console.log(GSLog.getLength());
-    }
+    GSLog.postState(GS, inputs);
 
     View.nextFrame(GS);
   }
