@@ -276,7 +276,7 @@ const ctx = canvas.getContext('2d'); const map = [
   { x1: 350, y1: 250, x2: 250, y2: 350 },
 ];
 
-const GS = new GameState(250, 150, map, 0, 0);
+let GS = new GameState(250, 150, map, 0, 0);
 const View = new Visualizer();
 const Engine = new GameEngine();
 const BrowserController = new Controller();
@@ -285,6 +285,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function main() {
   for (let i = 0; i < Infinity; i += 1) {
+    if (GS.bodyIntersects.length > 0) GS = new GameState(250, 150, map, 0, 0);
     await delay(16);
 
     const inputs = BrowserController.getInput();
