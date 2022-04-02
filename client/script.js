@@ -1,3 +1,5 @@
+import { sendGSToServer } from "../server";
+
 class Controller {
   constructor() {
     this.turnLeft = false;
@@ -199,10 +201,24 @@ class GSLogger {
     this.gamestates = []
   }
 
-  postState(gameState, inputs) {
-    // this.gamestates.push(this.gamestates)
+  postState(GS, inputs) {
+    const data = {
+      posX: GS.posX,
+      posY: GS.posY,
+      map: GS.map,
+      movVec: GS.movVec,
+      speed: GS.speed, 
+      rotSpeed: GS.rotSpeed,
+      turnLeft: inputs.turnLeft,
+      turnRight: inputs.turnRight,
+      accel: inputs.accel,
+    }
 
-    // post this to the server
+    const response = await fetch('gs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
   }
 
   getLength() {
