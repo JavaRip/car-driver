@@ -13,6 +13,7 @@ class Controller {
     const turnLeft = this.turnLeft;
     const turnRight = this.turnRight;
     const accel = this.accel;
+
     return { turnLeft, turnRight, accel };
   }
 
@@ -35,13 +36,14 @@ class Controller {
 }
 
 class GameState {
-  constructor(posX, posY, map, movVec, speed) {
+  constructor(posX, posY, map, movVec, speed, rotSpeed) {
     this.posX = posX;
     this.posY = posY;
     this.body = [];
     this.movVec = movVec;
     this.movRay = null;
     this.speed = speed;
+    this.rotSpeed = rotSpeed;
     this.map = map;
   }
 }
@@ -192,10 +194,26 @@ const ctx = canvas.getContext('2d'); const map = [
   { x1: 350, y1: 250, x2: 250, y2: 350 },
 ];
 
-const GS = new GameState(canvas.height / 2, canvas.width / 2, map, 0, 10);
+class GSLogger {
+  constructor() {
+    this.gamestates = []
+  }
+
+  postState(gameState) {
+    // this.gamestates.push(this.gamestates)
+    // post to the server
+  }
+
+  getLength() {
+    return this.gamestates.length
+  }
+}
+
+const GS = new GameState(canvas.height / 2, canvas.width / 2, map, 0, 10, 0);
 const View = new Visualizer();
 const Engine = new GameEngine();
 const BrowserController = new Controller();
+const GSLog = new GSLogger();
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -213,6 +231,12 @@ async function main() {
     GS.speed = newGs.speed;
     GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 75, GS.movVec, 0);
     GS.colRays = newGs.colRays;
+
+    GSLog.postState(GS);
+
+    if (i % 60 == 0) {
+      console.log(GSLog.getLength());
+    }
 
     View.nextFrame(GS);
   }
