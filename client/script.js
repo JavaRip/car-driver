@@ -35,13 +35,14 @@ class Controller {
 }
 
 class GameState {
-  constructor(posX, posY, map, movVec, speed) {
+  constructor(posX, posY, map, movVec, speed, rotSpeed) {
     this.posX = posX;
     this.posY = posY;
     this.body = [];
     this.movVec = movVec;
     this.movRay = null;
     this.speed = speed;
+    this.rotSpeed = rotSpeed;
     this.map = map;
   }
 }
@@ -92,21 +93,39 @@ class Visualizer {
 }
 
 class GameEngine {
-  moveCar(posX, posY, movVec, speed, inputs) {
+  moveCar(posX, posY, movVec, speed, rotSpeed, inputs) {
     const tau = Math.PI * 2;
     const rotationSpeed = 0.1;
     const accelRate = 0.3;
     const deccelRate = 1;
     const maxSpeed = 10;
+    const maxRotSpeed = 2000;
 
     if (inputs.turnLeft === true) {
-      movVec = (movVec - rotationSpeed * speed/15) % tau;
+      // movVec = (movVec - rotationSpeed * speed/15) % tau;
+
+      rotSpeed -= 100;
     }
 
     if (inputs.turnRight === true) {
-      movVec = (movVec + rotationSpeed * speed/15) % tau;
+      // movVec = (movVec + rotationSpeed * speed/15) % tau;
+
+      rotSpeed += 100;
+    }   
+
+    movVec = (movVec + (rotationSpeed * speed/15 * rotSpeed/1250)) % tau;
+
+    if (rotSpeed > 0) {
+      rotSpeed -= rotSpeed / 10;
+    } 
+    if (rotSpeed < 0) {
+      rotSpeed -= rotSpeed / 10;
     }
 
+    if (rotSpeed >= maxRotSpeed) {
+      rotSpeed = maxRotSpeed;
+    }
+      
     if (inputs.accel === true) {
       if (speed + accelRate <= maxSpeed) speed += accelRate;
       else speed = maxSpeed;
@@ -142,7 +161,7 @@ class GameEngine {
     colRays.push(this.getRayRelativeToPosition(FRLC.x2, FRLC.y2, 200, movVec, tau * 0.875));
     colRays.push(this.getRayRelativeToPosition(FRRC.x2, FRRC.y2, 200, movVec, tau * 0.125));
 
-    return { posX, posY, carBody, colRays, movVec, speed };
+    return { posX, posY, carBody, colRays, movVec, speed, rotSpeed };
   }
 
   getRayRelativeToPosition(posX, posY, rayLength, movVec, angleOffset) {
@@ -192,7 +211,7 @@ const ctx = canvas.getContext('2d'); const map = [
   { x1: 350, y1: 250, x2: 250, y2: 350 },
 ];
 
-const GS = new GameState(canvas.height / 2, canvas.width / 2, map, 0, 10);
+const GS = new GameState(canvas.height / 2, canvas.width / 2, map, 0, 10, 0);
 const View = new Visualizer();
 const Engine = new GameEngine();
 const BrowserController = new Controller();
@@ -205,12 +224,13 @@ async function main() {
 
     const inputs = BrowserController.getInput();
 
-    const newGs = Engine.moveCar(GS.posX, GS.posY, GS.movVec, GS.speed, inputs);
+    const newGs = Engine.moveCar(GS.posX, GS.posY, GS.movVec, GS.speed, GS.rotSpeed, inputs);
     GS.posX = newGs.posX;
     GS.posY = newGs.posY;
     GS.carBody = newGs.carBody;
     GS.movVec = newGs.movVec;
     GS.speed = newGs.speed;
+    GS.rotSpeed = newGs.rotSpeed;
     GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 75, GS.movVec, 0);
     GS.colRays = newGs.colRays;
 
