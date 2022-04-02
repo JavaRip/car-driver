@@ -217,9 +217,6 @@ async function main() {
   //var startTime = Date().geTime();
   //setInterval(function () {element.innerHTML += "Hello"}, 1000);
 
-
-
-    const startTime = new Date();
     setInterval(function () {
 
     const inputs = BrowserController.getInput();
@@ -233,14 +230,8 @@ async function main() {
     GS.movRay = Engine.getRayRelativeToPosition(GS.posX, GS.posY, 95, GS.movVec, 0);
     View.nextFrame(GS);
 
-    const endTime = new Date();
-    // Frame draw time
-    const result = endTime.getTime() - startTime.getTime();
-    fps = 1000/result
-    console.log(fps)
-
     //Modify this to change framerate. (1000/TargetFPS)
-  }, 1000/30);
+  }, 1000/50);
   }
 
 
