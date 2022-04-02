@@ -100,11 +100,11 @@ class GameEngine {
     const maxSpeed = 10;
 
     if (inputs.turnLeft === true) {
-      movVec = (movVec - rotationSpeed) % tau;
+      movVec = (movVec - rotationSpeed * speed/15) % tau;
     }
 
     if (inputs.turnRight === true) {
-      movVec = (movVec + rotationSpeed) % tau;
+      movVec = (movVec + rotationSpeed * speed/15) % tau;
     }
 
     if (inputs.accel === true) {
