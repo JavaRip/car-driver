@@ -9,10 +9,22 @@ class Controller {
     document.addEventListener('keyup', this.parseInputBound);
   }
 
-  getInput() {
-    const turnLeft = this.turnLeft;
-    const turnRight = this.turnRight;
-    const accel = this.accel;
+  async getInput(GS) {
+    const res = await fetch(
+      '/gamestate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gamestate: `${GS.posX}, ${GS.posY}, ${GS.movVec}, ${GS.speed}`,
+        }),
+      });
+
+    const nextMove = await res.json();
+
+    let turnRight, turnLeft, accel;
+    (nextMove[0] === '0') ? turnLeft = false : turnLeft = true;
+    (nextMove[1] === '0') ? turnRight = false : turnRight = true;
+    (nextMove[2] === '0') ? accel = false : accel = true;
 
     return { turnLeft, turnRight, accel };
   }
@@ -289,9 +301,9 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 async function main() {
   for (let i = 0; i < Infinity; i += 1) {
     if (GS.bodyIntersects.length > 0) GS = new GameState(250, 150, map, 0, 0);
-    await delay(32);
+    const inputs = await BrowserController.getInput(GS);
+    await delay(32)
 
-    const inputs = BrowserController.getInput();
     const data = {
       posX: GS.posX,
       posY: GS.posY,
@@ -304,15 +316,15 @@ async function main() {
       accel: inputs.accel,
     };
 
-    try {
-      fetch('gs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-    } catch (e) {
-      console.log(e);
-    }
+    // try {
+      // fetch('gs', {
+        // method: 'POST',
+        // headers: { 'Content-Type': 'application/json' },
+        // body: JSON.stringify(data),
+      // });
+    // } catch (e) {
+      // console.log(e);
+    // }
 
     const newGs = Engine.moveCar(GS.posX, GS.posY, GS.movVec, GS.speed, inputs, GS.map);
     GS.posX = newGs.posX;
