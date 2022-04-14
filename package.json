@@ -9,7 +9,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx tsc && cp src/client/index.html dist/client/ && cp src/client/default.css dist/client/"
+    "build": "npx tsc && cp src/client/index.html dist/client/ && cp src/client/default.css dist/client/",
+    "lint": "npx eslint ./src"
   },
   "author": "",
   "license": "ISC",
