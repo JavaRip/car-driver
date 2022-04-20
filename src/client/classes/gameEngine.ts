@@ -46,8 +46,15 @@ export default class GameEngine {
 
   static getCarSensors(vertices: point[], direction: number): vector[] {
     return [
-      this._getRelativeRay(vertices[0], 250, direction, Math.PI * 1.75),
-      this._getRelativeRay(vertices[1], 250, direction, Math.PI * 0.25),
+      this._getRelativeRay(vertices[0], 1000, direction, Math.PI * 1.75),
+      this._getRelativeRay(vertices[1], 1000, direction, Math.PI * 0.25),
+      this._getRelativeRay(vertices[0], 1000, direction, Math.PI * 2),
+      this._getRelativeRay(vertices[1], 1000, direction, Math.PI * 2),
+      this._getRelativeRay(vertices[0], 1000, direction, Math.PI * 1.5),
+      this._getRelativeRay(vertices[1], 1000, direction, Math.PI * 0.5),
+      this._getRelativeRay(vertices[2], 1000, direction, Math.PI * 0.5),
+      this._getRelativeRay(vertices[3], 1000, direction, Math.PI * 1.5),
+
     ];
   }
 

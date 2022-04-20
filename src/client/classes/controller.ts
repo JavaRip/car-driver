@@ -1,4 +1,4 @@
-import { controlstate } from '../../interfaces.js';
+import { controlstate, intersect } from '../../interfaces.js';
 import car from './vehicle.js';
 
 export default class Controller {
@@ -20,16 +20,26 @@ export default class Controller {
     };
   }
 
-  static async getApiInput(carState: car): Promise<controlstate | void> {
+  static async getApiInput(carState: intersect[]): Promise<controlstate> {
     const res = await fetch(
-      '/gamestate', {
+      '/getMove', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(carState),
       });
 
+    const controlArr: number[] = await res.json() as number[];
+
+    const inputs: controlstate = {
+      turnLeft: Boolean(Number(controlArr[0])),
+      turnRight: Boolean(Number(controlArr[1])),
+      accel: Boolean(Number(controlArr[2])),
+    };
+
     if (res.ok) {
-      return await res.json() as controlstate;
+      return inputs;
+    } else {
+      throw new Error();
     }
   }
 

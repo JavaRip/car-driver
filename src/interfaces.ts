@@ -23,3 +23,8 @@ export interface intersect {
   point: point,
   length: number,
 }
+
+export interface trainingrow {
+  sensors: number[],
+  inputs: controlstate,
+}

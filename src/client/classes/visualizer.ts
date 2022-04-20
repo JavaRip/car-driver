@@ -25,10 +25,16 @@ export default class Visualizer {
     }
   }
 
-  static drawVectorArray(canvas: HTMLCanvasElement, vectors: vector[], width: number, color: string): void {
+  static drawVectorArray(canvas: HTMLCanvasElement, vectors: vector[], width: number, color: string, texture: string): void {
     const ctx = canvas.getContext('2d');
 
     if (!ctx) return;
+
+    if (texture === 'dashed') {
+      ctx.setLineDash([5, 15]);
+    } else {
+      ctx.setLineDash([]);
+    }
 
     ctx.lineWidth = width;
     ctx.strokeStyle = color;
