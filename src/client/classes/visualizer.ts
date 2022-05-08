@@ -45,4 +45,9 @@ export default class Visualizer {
       ctx.stroke();
     }
   }
+
+  static togglePauseMenu(menu: HTMLDivElement): void {
+    if (menu.style.display === 'none') menu.style.display = '';
+    else menu.style.display = 'none';
+  }
 }

@@ -1,9 +1,37 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   background-color: cornflowerblue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
 }
 
 canvas {
-  height: 40em;
-  width: 40em;
-  border: 1px solid black
+  height: 100vh;
+  border: 5px solid hotpink;
+}
+
+#pause-menu {
+  position: absolute;
+  height: 100vh;
+  aspect-ratio: 1 / 1;
+  background-color: rgba(44, 50, 56, 0.9);
+  padding: 3rem 8rem 3rem 8em;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+#pause-menu > button {
+  width: 100%;
+  padding: 4rem;
+  font-size: 2rem;
+  cursor: pointer;
 }

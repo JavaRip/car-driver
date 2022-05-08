@@ -1,5 +1,4 @@
 import { controlstate, intersect } from '../../interfaces.js';
-import car from './vehicle.js';
 
 export default class Controller {
   turnLeft: boolean;
@@ -44,6 +43,7 @@ export default class Controller {
   }
 
   static parseUserInput(event: KeyboardEvent, controller: Controller): void {
+    console.log(event.key);
     switch (event.key) {
       case 'a':
       case 'ArrowLeft':
@@ -56,6 +56,22 @@ export default class Controller {
       case 'w':
       case 'ArrowUp':
         event.type === 'keydown' ? controller.accel = true : controller.accel = false;
+        break;
+      case 'p':
+      case 'Escape':
+        if (event.type === 'keydown') document.dispatchEvent(new Event('pause'));
+        break;
+      case 'Shift':
+        if (event.type === 'keydown') document.dispatchEvent(new Event('lock-x'));
+        if (event.type === 'keyup') document.dispatchEvent(new Event('unlock-x'));
+        break;
+      case 'Control':
+        if (event.type === 'keydown') document.dispatchEvent(new Event('lock-y'));
+        if (event.type === 'keyup') document.dispatchEvent(new Event('unlock-y'));
+        break;
+      case 'u':
+        console.log('hello');
+        if (event.type === 'keydown') document.dispatchEvent(new Event('delete-wall'));
         break;
     }
   }
