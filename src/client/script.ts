@@ -2,6 +2,7 @@ import GameEngine from './classes/gameEngine.js';
 import Controller from './classes/controller.js';
 import Visualizer from './classes/visualizer.js';
 import MapEditor from './classes/mapEditor.js';
+import { elements } from '../interfaces.js';
 
 import map from './map.js';
 
@@ -12,105 +13,36 @@ function delay(ms: number): Promise<void> {
   });
 }
 
-const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-const pauseMenu = document.querySelector('#pause-menu') as HTMLDivElement;
-const manualModeBtn = pauseMenu.querySelector('#manual-mode-btn') as HTMLButtonElement;
-const trainingDataModeBtn = pauseMenu.querySelector('#training-data-mode-btn') as HTMLButtonElement;
-const autopilotModeBtn = pauseMenu.querySelector('#autopilot-mode') as HTMLButtonElement;
-const mapEditorModeBtn = pauseMenu.querySelector('#map-editor') as HTMLButtonElement;
+function getElements(): elements {
+  return {
+    canvas: document.querySelector('#game-view') as HTMLCanvasElement,
+    pauseMenu: document.querySelector('#pause-menu') as HTMLDivElement,
+    manualModeBtn: document.querySelector('#manual-mode-btn') as HTMLButtonElement,
+    trainingDataModeBtn: document.querySelector('#training-data-mode-btn') as HTMLButtonElement,
+    autopilotModeBtn: document.querySelector('#autopilot-mode-btn') as HTMLButtonElement,
+    mapEditorModeBtn: document.querySelector('#map-editor-btn') as HTMLButtonElement,
+  };
+}
 
-if (!canvas) throw new Error();
+function initClasses(el: elements): void {
+  MapEditor.init(el.canvas);
+  Visualizer.init(el.pauseMenu, el.canvas);
+}
 
-const controller = new Controller();
-const mapEditor = new MapEditor(map);
+async function init(): Promise<void> {
+  const el = getElements();
+  initClasses(el);
 
-let mode = 'map-editor';
-let carState = GameEngine.resetCarState();
-
-document.addEventListener('keydown', (event) => {
-  Controller.parseUserInput(event, controller);
-});
-
-document.addEventListener('keyup', (event) => {
-  Controller.parseUserInput(event, controller);
-});
-
-document.addEventListener('pause', () => {
-  Visualizer.togglePauseMenu(pauseMenu);
-});
-
-document.addEventListener('lock-x', () => { mapEditor.lockX = true; });
-document.addEventListener('unlock-x', () => { mapEditor.lockX = false; });
-document.addEventListener('lock-y', () => { mapEditor.lockY = true; });
-document.addEventListener('unlock-y', () => { mapEditor.lockY = false; });
-document.addEventListener('delete-wall', () => {
-  MapEditor.deleteWall(mapEditor);
-  console.log('deleting wall (hopefully)');
-});
-
-canvas.addEventListener('mousedown', (event) => {
-  mapEditor.wallStart = MapEditor.getMousePosition(canvas, event);
-});
-
-canvas.addEventListener('mouseup', (event) => {
-  if (mode !== 'map-editor') return;
-  if (mapEditor.wallStart === null) return;
-  if (mapEditor.wallEnd === null) return;
-
-  mapEditor.wallEnd = MapEditor.getMousePosition(canvas, event);
-  mapEditor.createWall({
-    start: mapEditor.wallStart, end: mapEditor.wallEnd,
-  });
-
-  mapEditor.wallStart = null;
-  mapEditor.wallEnd = null;
-});
-
-canvas.addEventListener('mouseup', (event) => {
-  if (mode !== 'map-editor') return;
-  MapEditor.getMousePosition(canvas, event);
-});
-
-canvas.addEventListener('mousemove', (event) => {
-  if (mode !== 'map-editor') return;
-  if (mapEditor.wallStart === null) return;
-
-  const hoverPos = MapEditor.getMousePosition(canvas, event);
-  mapEditor.wallEnd = hoverPos;
-});
-
-manualModeBtn.addEventListener('mousedown', () => {
-  Visualizer.togglePauseMenu(pauseMenu);
-  GameEngine.resetCarState();
-  mode = 'manual';
-});
-
-trainingDataModeBtn.addEventListener('mousedown', () => {
-  Visualizer.togglePauseMenu(pauseMenu);
-  GameEngine.resetCarState();
-  mode = 'training';
-});
-
-autopilotModeBtn.addEventListener('mousedown', () => {
-  Visualizer.togglePauseMenu(pauseMenu);
-  GameEngine.resetCarState();
-  mode = 'autopilot';
-});
-
-mapEditorModeBtn.addEventListener('mousedown', () => {
-  Visualizer.togglePauseMenu(pauseMenu);
-  GameEngine.resetCarState();
-  mode = 'map-editor';
-});
-
-const targetFrameDuration = 64;
+  await main();
+}
 
 async function main(): Promise<void> {
+  let carState = GameEngine.resetCarState();
   let frameStartTime;
 
   while (true) {
     frameStartTime = Date.now();
-    if (mode === 'autopilot') {
+    if (Controller.mode === 'autopilot') {
       const carBody = GameEngine.getCarBody(carState);
       const sensors = GameEngine.getCarSensors(carBody.vertices, carState.direction);
       const sensorWallIntersects = GameEngine.findRealIntersect(sensors, map);
@@ -120,24 +52,24 @@ async function main(): Promise<void> {
 
       if (bodyWallIntersects.length !== 0) carState = GameEngine.resetCarState();
 
-      Visualizer.drawPointArray(canvas, sensorWallIntersectPoints, 3, 'gold');
-      Visualizer.drawPointArray(canvas, bodyWallIntersectPoints, 3, 'crimson');
-      Visualizer.drawVectorArray(canvas, carBody.sides, 3, 'skyblue', 'solid');
-      Visualizer.drawVectorArray(canvas, sensors, 3, 'hotpink', 'dashed');
-      Visualizer.drawVectorArray(canvas, map, 3, 'white', 'solid');
+      Visualizer.drawPointArray(sensorWallIntersectPoints, 3, 'gold');
+      Visualizer.drawPointArray(bodyWallIntersectPoints, 3, 'crimson');
+      Visualizer.drawVectorArray(carBody.sides, 3, 'skyblue', 'solid');
+      Visualizer.drawVectorArray(sensors, 3, 'hotpink', 'dashed');
+      Visualizer.drawVectorArray(map, 3, 'white', 'solid');
 
       const inputs = await Controller.getApiInput(sensorWallIntersects);
       carState = GameEngine.moveVehicle(carState, inputs);
-    } else if (mode === 'map-editor') {
-      Visualizer.drawVectorArray(canvas, map, 3, 'white', 'solid');
+    } else if (Controller.mode === 'map-editor') {
+      Visualizer.drawVectorArray(map, 3, 'white', 'solid');
 
-      if (mapEditor.wallEnd && mapEditor.wallStart) {
+      if (MapEditor.wallEnd && MapEditor.wallStart) {
         const wallPrevVec = {
-          start: mapEditor.wallStart, end: mapEditor.wallEnd,
+          start: MapEditor.wallStart, end: MapEditor.wallEnd,
         };
-        Visualizer.drawVectorArray(canvas, [wallPrevVec], 2, 'gray', 'solid');
+        Visualizer.drawVectorArray([wallPrevVec], 2, 'gray', 'solid');
       }
-    } else if (mode === 'manual') {
+    } else if (Controller.mode === 'manual') {
       const carBody = GameEngine.getCarBody(carState);
       const sensors = GameEngine.getCarSensors(carBody.vertices, carState.direction);
       const sensorWallIntersects = GameEngine.findRealIntersect(sensors, map);
@@ -147,32 +79,30 @@ async function main(): Promise<void> {
 
       if (bodyWallIntersects.length !== 0) carState = GameEngine.resetCarState();
 
-      Visualizer.drawPointArray(canvas, sensorWallIntersectPoints, 3, 'gold');
-      Visualizer.drawPointArray(canvas, bodyWallIntersectPoints, 3, 'crimson');
-      Visualizer.drawVectorArray(canvas, carBody.sides, 3, 'skyblue', 'solid');
-      Visualizer.drawVectorArray(canvas, sensors, 3, 'hotpink', 'dashed');
-      Visualizer.drawVectorArray(canvas, map, 3, 'white', 'solid');
+      Visualizer.drawPointArray(sensorWallIntersectPoints, 3, 'gold');
+      Visualizer.drawPointArray(bodyWallIntersectPoints, 3, 'crimson');
+      Visualizer.drawVectorArray(carBody.sides, 3, 'skyblue', 'solid');
+      Visualizer.drawVectorArray(sensors, 3, 'hotpink', 'dashed');
+      Visualizer.drawVectorArray(map, 3, 'white', 'solid');
 
-      const inputs = Controller.getInput(controller);
+      const inputs = Controller.getInput();
       carState = GameEngine.moveVehicle(carState, inputs);
-    } else if (mode === 'record-training-data') {
+    } else if (Controller.mode === 'record-training-data') {
       console.log('recording training data');
     }
 
     const frameDuration = Date.now() - frameStartTime;
     let frameBuffer;
 
-    if (targetFrameDuration - frameDuration > 0) {
-      frameBuffer = targetFrameDuration - frameDuration;
+    if (Controller.targetFrameDuration - frameDuration > 0) {
+      frameBuffer = Controller.targetFrameDuration - frameDuration;
     } else {
       frameBuffer = 0;
     }
 
-    // console.debug(frameBuffer);
-
     await delay(frameBuffer);
-    Visualizer.clearViewports(canvas);
+    Visualizer.clearViewports();
   }
 }
 
-await main();
+window.addEventListener('load', init);

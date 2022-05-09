@@ -1,21 +1,49 @@
 import { controlstate, intersect } from '../../interfaces.js';
 
 export default class Controller {
-  turnLeft: boolean;
-  turnRight: boolean;
-  accel: boolean;
+  static turnLeft: boolean;
+  static turnRight: boolean;
+  static accel: boolean;
+  static mode: string;
+  static targetFrameDuration: number; // milliseconds
 
-  constructor() {
+  static {
     this.turnLeft = false;
     this.turnRight = false;
     this.accel = false;
+    this.mode = 'map-editor';
+    this.targetFrameDuration = 32;
+
+    document.addEventListener('keydown', (event) => {
+      this.parseKeyboardInput(event);
+    });
+
+    document.addEventListener('keyup', (event) => {
+      this.parseKeyboardInput(event);
+    });
+
+    document.addEventListener('mousedown', (event) => {
+      this.parseMouseInput(event);
+    });
+
+    document.addEventListener('mouseup', (event) => {
+      this.parseMouseInput(event);
+    });
+
+    document.addEventListener('mousemove', (event) => {
+      this.parseMouseInput(event);
+    });
+
+    document.addEventListener('change-mode', (event) => {
+      this.mode = (event as CustomEvent).detail;
+    });
   }
 
-  static getInput(controller: Controller): controlstate {
+  static getInput(): controlstate {
     return {
-      turnLeft: controller.turnLeft,
-      turnRight: controller.turnRight,
-      accel: controller.accel,
+      turnLeft: this.turnLeft,
+      turnRight: this.turnRight,
+      accel: this.accel,
     };
   }
 
@@ -42,20 +70,19 @@ export default class Controller {
     }
   }
 
-  static parseUserInput(event: KeyboardEvent, controller: Controller): void {
-    console.log(event.key);
+  static parseKeyboardInput(event: KeyboardEvent): void {
     switch (event.key) {
       case 'a':
       case 'ArrowLeft':
-        event.type === 'keydown' ? controller.turnLeft = true : controller.turnLeft = false;
+        event.type === 'keydown' ? this.turnLeft = true : this.turnLeft = false;
         break;
       case 'd':
       case 'ArrowRight':
-        event.type === 'keydown' ? controller.turnRight = true : controller.turnRight = false;
+        event.type === 'keydown' ? this.turnRight = true : this.turnRight = false;
         break;
       case 'w':
       case 'ArrowUp':
-        event.type === 'keydown' ? controller.accel = true : controller.accel = false;
+        event.type === 'keydown' ? this.accel = true : this.accel = false;
         break;
       case 'p':
       case 'Escape':
@@ -70,8 +97,73 @@ export default class Controller {
         if (event.type === 'keyup') document.dispatchEvent(new Event('unlock-y'));
         break;
       case 'u':
-        console.log('hello');
         if (event.type === 'keydown') document.dispatchEvent(new Event('delete-wall'));
+        break;
+    }
+  }
+
+  static parseMouseInput(event: MouseEvent): void {
+    const target = event.target as Element;
+    if (target.id == null) return;
+    switch (target.id) {
+      case 'game-view':
+        if (event.type === 'mousedown' && this.mode === 'map-editor') {
+          const createWallEvent = new CustomEvent(
+            'create-wall-point',
+            { detail: event },
+          );
+
+          document.dispatchEvent(createWallEvent);
+        }
+
+        if (event.type === 'mousemove' && this.mode === 'map-editor') {
+          const previewWallEvent = new CustomEvent(
+            'preview-wall-point',
+            { detail: event },
+          );
+
+          document.dispatchEvent(previewWallEvent);
+        }
+        break;
+      case 'manual-mode-btn':
+        if (event.type === 'mousedown') {
+          const changeModeEvent = new CustomEvent(
+            'change-mode',
+            { detail: 'manual' },
+          );
+
+          document.dispatchEvent(changeModeEvent);
+        }
+        break;
+      case 'training-data-mode-btn':
+        if (event.type === 'mousedown') {
+          const changeModeEvent = new CustomEvent(
+            'change-mode',
+            { detail: 'training' },
+          );
+
+          document.dispatchEvent(changeModeEvent);
+        }
+        break;
+      case 'autopilot-mode-btn':
+        if (event.type === 'mousedown') {
+          const changeModeEvent = new CustomEvent(
+            'change-mode',
+            { detail: 'autopilot' },
+          );
+
+          document.dispatchEvent(changeModeEvent);
+        }
+        break;
+      case 'map-editor-btn':
+        if (event.type === 'mousedown') {
+          const changeModeEvent = new CustomEvent(
+            'change-mode',
+            { detail: 'map-editor' },
+          );
+
+          document.dispatchEvent(changeModeEvent);
+        }
         break;
     }
   }

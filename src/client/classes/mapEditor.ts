@@ -1,18 +1,55 @@
 import { point, vector } from '../../interfaces.js';
+import map from '../map.js';
 
 export default class mapEditor {
-  wallStart: point | null;
-  wallEnd: point | null;
-  lockX: boolean;
-  lockY: boolean;
-  map: vector[];
+  static wallStart: point | null;
+  static wallEnd: point | null;
+  static lockX: boolean;
+  static lockY: boolean;
+  static map: vector[];
+  static canvas: null | HTMLCanvasElement;
 
-  constructor(map: vector[]) {
+  static init(canvas: HTMLCanvasElement): void {
+    this.canvas = canvas;
+
+    document.addEventListener('create-wall-point', (event) => {
+      if (this.canvas === null) throw new Error();
+      const mouseEvent = (event as CustomEvent).detail;
+
+      if (this.wallStart === null) {
+        this.wallStart = this.getMousePosition(this.canvas, mouseEvent);
+      } else if (this.wallStart !== null && this.wallEnd !== null) {
+        this.createWall({
+          start: this.wallStart, end: this.wallEnd,
+        });
+
+        this.wallStart = null;
+        this.wallEnd = null;
+      }
+    });
+
+    document.addEventListener('preview-wall-point', (event) => {
+      if (this.canvas === null) throw new Error();
+      if (this.wallStart === null) return;
+
+      const mouseEvent = (event as CustomEvent).detail;
+      const hoverPos = this.getMousePosition(canvas, mouseEvent);
+      this.wallEnd = hoverPos;
+    });
+  }
+
+  static {
     this.map = map;
     this.wallStart = null;
     this.wallEnd = null;
     this.lockX = false;
     this.lockY = false;
+
+    document.addEventListener('lock-x', () => { this.lockX = true; });
+    document.addEventListener('unlock-x', () => { this.lockX = false; });
+    document.addEventListener('lock-y', () => { this.lockY = true; });
+    document.addEventListener('unlock-y', () => { this.lockY = false; });
+    document.addEventListener('delete-wall', () => this.deleteWall());
   }
 
   static getMousePosition(canvas: HTMLCanvasElement, event: MouseEvent): point {
@@ -31,12 +68,12 @@ export default class mapEditor {
     return { x: modelX, y: modelY };
   }
 
-  createWall(wall: vector): void {
+  static createWall(wall: vector): void {
     this.map.push(wall);
   }
 
-  static deleteWall(me: mapEditor): void {
-    if (me.map.length > 0) me.map.pop();
+  static deleteWall(): void {
+    if (this.map.length > 0) this.map.pop();
     else console.error('no walls to delete');
   }
 }
