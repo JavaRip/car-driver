@@ -28,3 +28,12 @@ export interface trainingrow {
   sensors: number[],
   inputs: controlstate,
 }
+
+export interface elements {
+  canvas: HTMLCanvasElement,
+  pauseMenu: HTMLDivElement,
+  manualModeBtn: HTMLButtonElement,
+  trainingDataModeBtn: HTMLButtonElement,
+  autopilotModeBtn: HTMLButtonElement,
+  mapEditorModeBtn: HTMLButtonElement,
+}

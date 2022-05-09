@@ -1,8 +1,8 @@
 import { vehiclebody, controlstate, point, vector, intersect } from '../../interfaces.js';
-import vehicle from './vehicle.js';
+import Vehicle from './vehicle.js';
 
 export default class GameEngine {
-  static moveVehicle(car: vehicle, inputs: controlstate): vehicle {
+  static moveVehicle(car: Vehicle, inputs: controlstate): Vehicle {
     const tau = Math.PI * 2;
     const rotationSpeed = 0.1;
     const accelRate = 0.3;
@@ -137,7 +137,7 @@ export default class GameEngine {
     }
   }
 
-  static getCarBody(car: vehicle): vehiclebody {
+  static getCarBody(car: Vehicle): vehiclebody {
     const tau = Math.PI * 2;
 
     const carWidth = 30;
@@ -190,5 +190,10 @@ export default class GameEngine {
     const rayEndpoint: point = { x: pos.x + rayExtendedX, y: pos.y + rayExtendedY };
 
     return { start: pos, end: rayEndpoint };
+  }
+
+
+  static resetCarState(): Vehicle {
+    return new Vehicle({ x: 250, y: 150 }, 0, 0);
   }
 }

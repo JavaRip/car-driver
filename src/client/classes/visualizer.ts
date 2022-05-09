@@ -1,17 +1,33 @@
 import { point, vector } from '../../interfaces.js';
 
 export default class Visualizer {
-  static clearViewports(canvas: HTMLCanvasElement): void {
-    const ctx = canvas.getContext('2d');
+  static pauseMenu: null | HTMLDivElement;
+  static canvas: null | HTMLCanvasElement;
+
+  static init(pauseMenu: HTMLDivElement, canvas: HTMLCanvasElement): void {
+    this.pauseMenu = pauseMenu;
+    this.canvas = canvas;
+
+    document.addEventListener('pause', () => {
+      Visualizer.togglePauseMenu();
+    });
+  }
+
+  static clearViewports(): void {
+    if (this.canvas === null) throw new Error();
+
+    const ctx = this.canvas.getContext('2d');
 
     if (!ctx) return;
 
     ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.height, canvas.width);
+    ctx.fillRect(0, 0, this.canvas.height, this.canvas.width);
   }
 
-  static drawPointArray(canvas: HTMLCanvasElement, points: point[], width: number, color: string): void {
-    const ctx = canvas.getContext('2d');
+  static drawPointArray(points: point[], width: number, color: string): void {
+    if (this.canvas === null) throw new Error();
+
+    const ctx = this.canvas.getContext('2d');
 
     if (!ctx) return;
 
@@ -25,8 +41,10 @@ export default class Visualizer {
     }
   }
 
-  static drawVectorArray(canvas: HTMLCanvasElement, vectors: vector[], width: number, color: string, texture: string): void {
-    const ctx = canvas.getContext('2d');
+  static drawVectorArray(vectors: vector[], width: number, color: string, texture: string): void {
+    if (this.canvas === null) throw new Error();
+
+    const ctx = this.canvas.getContext('2d');
 
     if (!ctx) return;
 
@@ -43,6 +61,16 @@ export default class Visualizer {
       ctx.moveTo(v.start.x, v.start.y);
       ctx.lineTo(v.end.x, v.end.y);
       ctx.stroke();
+    }
+  }
+
+  static togglePauseMenu(): void {
+    if (this.pauseMenu === null) throw new Error();
+
+    if (this.pauseMenu.style.display === 'none') {
+      this.pauseMenu.style.display = '';
+    } else {
+      this.pauseMenu.style.display = 'none';
     }
   }
 }
