@@ -28,6 +28,6 @@
     "csv-write-stream": "^2.0.0",
     "express": "^4.17.3",
     "node-fetch": "^3.2.3",
-    "typescript": "^4.6.3"
+    "typescript": "^4.9.5"
   }
 }

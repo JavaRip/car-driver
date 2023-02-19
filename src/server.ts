@@ -15,7 +15,7 @@ function asyncWrap(f: RequestHandler): RequestHandler {
 async function getNextMove(req: Request, res: Response): Promise<void> {
   const sensors: intersect[] = req.body;
   const nextMoveRes = await fetch(
-    'http://localhost:5000/gamestate', {
+    'http://127.0.0.1:5000/gamestate', {
       method: 'POST',
       body: JSON.stringify(sensors.map(x => x.length)),
     });
