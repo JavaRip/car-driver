@@ -1,0 +1,9 @@
+body {
+  background-color: cornflowerblue;
+}
+
+canvas {
+  height: 40em;
+  width: 40em;
+  border: 1px solid black
+}
