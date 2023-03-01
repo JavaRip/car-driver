@@ -5,7 +5,7 @@ import Visualizer from './classes/visualizer.js';
 import map from './map.js';
 import { trainingrow, intersect, controlstate } from './interfaces.js';
 
-function delay(ms: number): Promise<void> {
+export function delay(ms: number): Promise<void> {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(resolve, ms);
     if (!timeoutId) reject(new Error('failed to delay'));
@@ -18,17 +18,17 @@ if (!canvas) throw new Error();
 
 const controller = new Controller();
 
-function resetCarState() {
+export function resetCarState(): Car {
   return new Car({ x: 250, y: 150 }, 0, 0);
 }
 
-async function submitGameState(sensorWallIntersects: intersect[], inputs: controlstate) {
+export async function submitGameState(sensorWallIntersects: intersect[], inputs: controlstate): Promise<void> {
   const data: trainingrow = {
     sensors: sensorWallIntersects.map(x => x.length),
     inputs: inputs,
   };
 
-  const res = await fetch(
+  await fetch(
     '/submitTrainingData', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -47,7 +47,7 @@ document.addEventListener('keyup', (event) => {
 
 const targetFrameDuration = 32;
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   let carState = resetCarState();
   let frameStartTime;
 
@@ -59,11 +59,11 @@ async function main(): Promise<void> {
     const sensorWallIntersects = GameEngine.findRealIntersect(sensors, map);
     const sensorWallIntersectPoints = sensorWallIntersects.map(x => x.point);
     if (sensorWallIntersectPoints.length < sensors.length) {
-      console.warn('missing intersects')
-      console.log(sensors)
-      console.log(map)
-      console.log(sensorWallIntersects)
-      console.log('--------------------------------')
+      console.warn('missing intersects');
+      console.log(sensors);
+      console.log(map);
+      console.log(sensorWallIntersects);
+      console.log('--------------------------------');
     }
     const bodyWallIntersects = GameEngine.findRealIntersect(carBody.sides, map);
     const bodyWallIntersectPoints = bodyWallIntersects.map(x => x.point);
@@ -77,7 +77,7 @@ async function main(): Promise<void> {
     Visualizer.drawVectorArray(canvas, map, 3, 'white', 'solid');
 
     // const inputs = await Controller.getApiInput(sensorWallIntersects);
-    const inputs = await Controller.getInput(controller);
+    const inputs = Controller.getInput(controller);
     const frameDuration = Date.now() - frameStartTime;
 
     let frameBuffer;
