@@ -36,8 +36,8 @@ export default class GameEngine {
 
     return {
       position: {
-        x: car.position.x + Math.cos(car.direction) * car.speed,
-        y: car.position.y + Math.sin(car.direction) * car.speed,
+        x: Math.round(car.position.x + Math.cos(car.direction) * car.speed),
+        y: Math.round(car.position.y + Math.sin(car.direction) * car.speed),
       },
       speed: updatedSpeed,
       direction: updatedDir,
@@ -56,6 +56,7 @@ export default class GameEngine {
       this._getRelativeRay(vertices[3], 1000, direction, Math.PI * 1.5),
     ];
   }
+  // rays1 = sensors, rays2 = map
 
   static findRealIntersect(rays1: vector[], rays2: vector[]): intersect[] {
     const intersects = [];
@@ -100,7 +101,7 @@ export default class GameEngine {
         isect.point.y >= ray1.end.y
       ) {
         intersects.push(isect);
-      } 
+      }
     }
 
     return intersects;
@@ -130,7 +131,7 @@ export default class GameEngine {
     if (t > 0 && t < 1 && u > 0) {
       const intersectX = ray2.start.x + t * (ray2.end.x - ray2.start.x);
       const intersectY = ray2.start.y + t * (ray2.end.y - ray2.start.y);
-      return { x: intersectX, y: intersectY };
+      return { x: Math.round(intersectX), y: Math.round(intersectY) };
     } else {
       return { x: Infinity, y: Infinity };
     }
@@ -181,13 +182,15 @@ export default class GameEngine {
   ): vector {
     // without offset, cast the ray directly down the direction the car is facing
     // use offset to cast ray relative to this position. Offset is in radians
-
+    const startPoint: point = { x: Math.round(pos.x), y: Math.round(pos.y) };
     const rayOffsetX = Math.cos(movVec + angleOffset);
     const rayOffsetY = Math.sin(movVec + angleOffset);
     const rayExtendedX = rayOffsetX * rayLength;
     const rayExtendedY = rayOffsetY * rayLength;
-    const rayEndpoint: point = { x: pos.x + rayExtendedX, y: pos.y + rayExtendedY };
-
-    return { start: pos, end: rayEndpoint };
+    const rayEndpoint: point = { x: Math.round(pos.x + rayExtendedX), y: Math.round(pos.y + rayExtendedY) };
+    console.log('Ray:');
+    console.log(startPoint);
+    console.log(rayEndpoint);
+    return { start: startPoint, end: rayEndpoint };
   }
 }

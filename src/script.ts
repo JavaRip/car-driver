@@ -59,7 +59,7 @@ export async function main(): Promise<void> {
     const sensorWallIntersects = GameEngine.findRealIntersect(sensors, map);
     const sensorWallIntersectPoints = sensorWallIntersects.map(x => x.point);
     if (sensorWallIntersectPoints.length < sensors.length) {
-      console.warn('missing intersects');
+      console.warn('missing intersects:');
       console.log(sensors);
       console.log(map);
       console.log(sensorWallIntersects);
