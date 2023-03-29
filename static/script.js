@@ -3,7 +3,7 @@ import Controller from './classes/controller.js';
 import Car from './classes/vehicle.js';
 import Visualizer from './classes/visualizer.js';
 import map from './map.js';
-function delay(ms) {
+export function delay(ms) {
     return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(resolve, ms);
         if (!timeoutId)
@@ -14,15 +14,15 @@ const canvas = document.querySelector('canvas');
 if (!canvas)
     throw new Error();
 const controller = new Controller();
-function resetCarState() {
+export function resetCarState() {
     return new Car({ x: 250, y: 150 }, 0, 0);
 }
-async function submitGameState(sensorWallIntersects, inputs) {
+export async function submitGameState(sensorWallIntersects, inputs) {
     const data = {
         sensors: sensorWallIntersects.map(x => x.length),
         inputs: inputs,
     };
-    const res = await fetch('/submitTrainingData', {
+    await fetch('/submitTrainingData', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -35,7 +35,7 @@ document.addEventListener('keyup', (event) => {
     Controller.parseUserInput(event, controller);
 });
 const targetFrameDuration = 32;
-async function main() {
+export async function main() {
     let carState = resetCarState();
     let frameStartTime;
     for (let i = 0; i < Infinity; i += 1) {
@@ -45,7 +45,8 @@ async function main() {
         const sensorWallIntersects = GameEngine.findRealIntersect(sensors, map);
         const sensorWallIntersectPoints = sensorWallIntersects.map(x => x.point);
         if (sensorWallIntersectPoints.length < sensors.length) {
-            console.warn('missing intersects');
+            console.warn('Missing Intersects:');
+            console.log('Intersects:');
             console.log(sensors);
             console.log(map);
             console.log(sensorWallIntersects);
@@ -61,7 +62,7 @@ async function main() {
         Visualizer.drawVectorArray(canvas, sensors, 3, 'hotpink', 'dashed');
         Visualizer.drawVectorArray(canvas, map, 3, 'white', 'solid');
         // const inputs = await Controller.getApiInput(sensorWallIntersects);
-        const inputs = await Controller.getInput(controller);
+        const inputs = Controller.getInput(controller);
         const frameDuration = Date.now() - frameStartTime;
         let frameBuffer;
         if (targetFrameDuration - frameDuration > 0) {

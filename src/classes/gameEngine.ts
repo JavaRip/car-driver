@@ -38,6 +38,8 @@ export default class GameEngine {
       position: {
         x: Math.round(car.position.x + Math.cos(car.direction) * car.speed),
         y: Math.round(car.position.y + Math.sin(car.direction) * car.speed),
+        // x: car.position.x + Math.cos(car.direction) * car.speed,
+        // y: car.position.y + Math.sin(car.direction) * car.speed,
       },
       speed: updatedSpeed,
       direction: updatedDir,
@@ -131,7 +133,7 @@ export default class GameEngine {
     if (t > 0 && t < 1 && u > 0) {
       const intersectX = ray2.start.x + t * (ray2.end.x - ray2.start.x);
       const intersectY = ray2.start.y + t * (ray2.end.y - ray2.start.y);
-      return { x: Math.round(intersectX), y: Math.round(intersectY) };
+      return { x: intersectX, y: intersectY };
     } else {
       return { x: Infinity, y: Infinity };
     }
@@ -182,15 +184,16 @@ export default class GameEngine {
   ): vector {
     // without offset, cast the ray directly down the direction the car is facing
     // use offset to cast ray relative to this position. Offset is in radians
-    const startPoint: point = { x: Math.round(pos.x), y: Math.round(pos.y) };
+    // const startPoint: point = { x: Math.round(pos.x), y: Math.round(pos.y) };
     const rayOffsetX = Math.cos(movVec + angleOffset);
     const rayOffsetY = Math.sin(movVec + angleOffset);
     const rayExtendedX = rayOffsetX * rayLength;
     const rayExtendedY = rayOffsetY * rayLength;
-    const rayEndpoint: point = { x: Math.round(pos.x + rayExtendedX), y: Math.round(pos.y + rayExtendedY) };
-    console.log('Ray:');
-    console.log(startPoint);
-    console.log(rayEndpoint);
-    return { start: startPoint, end: rayEndpoint };
+    // const rayEndpoint: point = { x: Math.round(pos.x + rayExtendedX), y: Math.round(pos.y + rayExtendedY) };
+    const rayEndpoint: point = { x: pos.x + rayExtendedX, y: pos.y + rayExtendedY };
+    // console.log('Ray:');
+    // console.log(startPoint);
+    // console.log(rayEndpoint);
+    return { start: pos, end: rayEndpoint };
   }
 }

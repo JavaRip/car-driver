@@ -58,13 +58,14 @@ export async function main(): Promise<void> {
     const sensors = GameEngine.getCarSensors(carBody.vertices, carState.direction);
     const sensorWallIntersects = GameEngine.findRealIntersect(sensors, map);
     const sensorWallIntersectPoints = sensorWallIntersects.map(x => x.point);
-    if (sensorWallIntersectPoints.length < sensors.length) {
-      console.warn('missing intersects:');
-      console.log(sensors);
-      console.log(map);
-      console.log(sensorWallIntersects);
-      console.log('--------------------------------');
-    }
+    // if (sensorWallIntersectPoints.length < sensors.length) {
+    //   console.warn('Missing Intersects:');
+    //   console.log('Intersects:');
+    //   console.log(sensors);
+    //   console.log(map);
+    //   console.log(sensorWallIntersects);
+    //   console.log('--------------------------------');
+    // }
     const bodyWallIntersects = GameEngine.findRealIntersect(carBody.sides, map);
     const bodyWallIntersectPoints = bodyWallIntersects.map(x => x.point);
 
