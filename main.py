@@ -24,7 +24,6 @@ def get_model(training_data):
     # outputs = data_df_outputs.to_numpy()
 
     clf = MLPClassifier(solver='lbfgs', alpha=1e-8, hidden_layer_sizes=(8, 3), random_state=1, max_iter=500)
-    print(data_df_inputs)
     clf.fit(data_df_inputs, data_df_outputs)
     return clf
 
@@ -45,7 +44,7 @@ def clean_data(data, train):
   data_df['sen6'] = data_df['sen6'].astype(float) / 1000
   data_df['sen7'] = data_df['sen7'].astype(float) / 1000
   data_df['sen8'] = data_df['sen8'].astype(float) / 1000
- 
+
   return data_df
 
 print('cleaning data')
@@ -60,17 +59,17 @@ def get_next_move():
   gamestate = request.get_json(force=True)
   sensors = list(map(lambda x: x['length'], gamestate))
   gamestate_df = pd.DataFrame(
-    data=[sensors], 
+    data=[sensors],
     columns=[
-      'sen1', 
-      'sen2', 
-      'sen3', 
-      'sen4', 
-      'sen5', 
-      'sen6', 
-      'sen7', 
+      'sen1',
+      'sen2',
+      'sen3',
+      'sen4',
+      'sen5',
+      'sen6',
+      'sen7',
       'sen8'
-    ], 
+    ],
     dtype='float32'
   )
 
