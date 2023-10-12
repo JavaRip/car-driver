@@ -62,4 +62,4 @@ def get_next_move():
   return str(next_move)
 
 if __name__ == '__main__':
-   app.run(debug = False)
+   app.run(debug = True)

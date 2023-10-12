@@ -60,8 +60,8 @@ async function main() {
         Visualizer.drawVectorArray(canvas, carBody.sides, 3, 'skyblue', 'solid');
         Visualizer.drawVectorArray(canvas, sensors, 3, 'hotpink', 'dashed');
         Visualizer.drawVectorArray(canvas, map, 3, 'white', 'solid');
-        // const inputs = await Controller.getApiInput(sensorWallIntersects);
-        const inputs = await Controller.getInput(controller);
+        const inputs = await Controller.getApiInput(sensorWallIntersects);
+        // const inputs = await Controller.getInput(controller);
         const frameDuration = Date.now() - frameStartTime;
         let frameBuffer;
         if (targetFrameDuration - frameDuration > 0) {

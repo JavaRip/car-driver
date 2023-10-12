@@ -76,8 +76,8 @@ async function main(): Promise<void> {
     Visualizer.drawVectorArray(canvas, sensors, 3, 'hotpink', 'dashed');
     Visualizer.drawVectorArray(canvas, map, 3, 'white', 'solid');
 
-    // const inputs = await Controller.getApiInput(sensorWallIntersects);
-    const inputs = await Controller.getInput(controller);
+    const inputs = await Controller.getApiInput(sensorWallIntersects);
+    // const inputs = await Controller.getInput(controller);
     const frameDuration = Date.now() - frameStartTime;
 
     let frameBuffer;
