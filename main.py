@@ -14,16 +14,17 @@ def home():
   return render_template("index.html")
 
 def get_model(training_data):
-    # data_df_inputs = pd.read_csv('./clean_data.csv', usecols=['posX', 'posY', 'movVec', 'speed'])
-    # data_df_outputs = pd.read_csv('./clean_data.csv', usecols=['turnLeft', 'turnRight', 'accel'])
-
     data_df_inputs = training_data[['sen1', 'sen2', 'sen3', 'sen4', 'sen5', 'sen6', 'sen7', 'sen8']]
     data_df_outputs = training_data[['turnLeft', 'turnRight', 'accel']]
 
-    # inputs = data_df_inputs.to_numpy()
-    # outputs = data_df_outputs.to_numpy()
+    clf = MLPClassifier(
+      solver='lbfgs',
+      alpha=1e-8,
+      hidden_layer_sizes=(8, 3),
+      random_state=1,
+      max_iter=500,
+    )
 
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-8, hidden_layer_sizes=(8, 3), random_state=1, max_iter=500)
     clf.fit(data_df_inputs, data_df_outputs)
     return clf
 
