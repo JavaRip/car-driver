@@ -1,5 +1,4 @@
 import { controlstate, intersect } from '../interfaces.js';
-import car from './vehicle.js';
 
 export default class Controller {
   turnLeft: boolean;
@@ -29,7 +28,6 @@ export default class Controller {
       });
 
     const controlArr: number[] = await res.json() as number[];
-    console.log(controlArr)
 
     const inputs: controlstate = {
       turnLeft: Boolean(Number(controlArr[0])),

@@ -80,4 +80,4 @@ def get_next_move():
   return json.dumps(next_move.tolist())
 
 if __name__ == "__main__":
-  app.run(debug=True)
+  app.run(debug=False)

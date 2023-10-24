@@ -27,6 +27,9 @@ async function submitGameState(sensorWallIntersects, inputs) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
     });
+    if (!res.ok) {
+        throw new Error(`Failed to submit training data: ${res.status}`);
+    }
 }
 document.addEventListener('keydown', (event) => {
     Controller.parseUserInput(event, controller);
@@ -44,13 +47,6 @@ async function main() {
         const sensors = GameEngine.getCarSensors(carBody.vertices, carState.direction);
         const sensorWallIntersects = GameEngine.findRealIntersect(sensors, map);
         const sensorWallIntersectPoints = sensorWallIntersects.map(x => x.point);
-        if (sensorWallIntersectPoints.length < sensors.length) {
-            console.warn('missing intersects');
-            console.log(sensors);
-            console.log(map);
-            console.log(sensorWallIntersects);
-            console.log('--------------------------------');
-        }
         const bodyWallIntersects = GameEngine.findRealIntersect(carBody.sides, map);
         const bodyWallIntersectPoints = bodyWallIntersects.map(x => x.point);
         if (bodyWallIntersects.length !== 0)
@@ -69,12 +65,7 @@ async function main() {
         }
         else {
             frameBuffer = 0;
-            console.warn('frame duration over target');
         }
-        // console.log(frameStartTime);
-        // console.log(frameDuration);
-        // console.log(frameBuffer);
-        // console.log('==========');
         await delay(frameBuffer);
         Visualizer.clearViewports(canvas);
         carState = GameEngine.moveVehicle(carState, inputs);

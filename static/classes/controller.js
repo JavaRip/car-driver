@@ -21,7 +21,6 @@ export default class Controller {
             body: JSON.stringify(carState),
         });
         const controlArr = await res.json();
-        console.log(controlArr);
         const inputs = {
             turnLeft: Boolean(Number(controlArr[0])),
             turnRight: Boolean(Number(controlArr[1])),

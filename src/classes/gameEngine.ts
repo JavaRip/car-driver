@@ -157,10 +157,10 @@ export default class GameEngine {
       this._getRelativeRay(car.position, carHypot, car.direction, tau - angle);
 
     const carVertices: point[] = [
-      { x: FLC.end.x, y: FLC.end.y }, // front left
-      { x: FRC.end.x, y: FRC.end.y }, // front right
-      { x: RRC.end.x, y: RRC.end.y }, // back right
-      { x: RLC.end.x, y: RLC.end.y }, // back left
+      { x: Math.round(FLC.end.x), y: Math.round(FLC.end.y) }, // front left
+      { x: Math.round(FRC.end.x), y: Math.round(FRC.end.y) }, // front right
+      { x: Math.round(RRC.end.x), y: Math.round(RRC.end.y) }, // back right
+      { x: Math.round(RLC.end.x), y: Math.round(RLC.end.y) }, // back left
     ];
 
     const carSides: vector[] = [
