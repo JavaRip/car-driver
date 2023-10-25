@@ -1,5 +1,5 @@
 import json
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 import logging
 import pandas as pd
 import numpy as np
@@ -7,11 +7,12 @@ import sklearn as sk
 import math
 from sklearn.neural_network import MLPClassifier
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='', static_folder='static')
 
 @app.route("/")
 def home():
-  return render_template("index.html")
+  return send_from_directory(app.static_folder, 'index.html')
+
 
 def get_model(training_data):
     data_df_inputs = training_data[['sen1', 'sen2', 'sen3', 'sen4', 'sen5', 'sen6', 'sen7', 'sen8']]
