@@ -66,6 +66,9 @@ export default class vehicle {
     this.position.y = Math.round(this.position.y + Math.sin(this.direction) * this.speed);
     this.speed = updatedSpeed;
     this.direction = updatedDir;
+
+    this.body = this.getCarBody();
+    this.sensors = this.getSensors();
   }
 
   getSensors(): Vector[] {

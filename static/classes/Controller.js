@@ -37,6 +37,7 @@ export default class Controller {
         }
     }
     static parseUserInput(event) {
+        console.log(`parsing input, ${event.key}`);
         switch (event.key) {
             case 'a':
             case 'ArrowLeft':
@@ -53,4 +54,5 @@ export default class Controller {
         }
     }
 }
+Controller.init();
 //# sourceMappingURL=Controller.js.map
