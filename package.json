@@ -9,7 +9,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx tsc && cp src/client/index.html static/client/ && cp src/client/default.css static/client/ && npm run lint",
+    "build": "npx tsc && cp src/index.html static/ && cp src/default.css static/ && npm run lint",
     "lint": "npx eslint ./src"
   },
   "author": "",

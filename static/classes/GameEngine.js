@@ -34,8 +34,8 @@ export default class GameEngine {
         }
         return {
             position: {
-                x: car.position.x + Math.cos(car.direction) * car.speed,
-                y: car.position.y + Math.sin(car.direction) * car.speed,
+                x: Math.round(car.position.x + Math.cos(car.direction) * car.speed),
+                y: Math.round(car.position.y + Math.sin(car.direction) * car.speed),
             },
             speed: updatedSpeed,
             direction: updatedDir,
@@ -104,8 +104,8 @@ export default class GameEngine {
             (ray2.end.y - ray2.start.y) * (ray2.start.x - ray1.start.x)) / denominator;
         // if points do intersect calculate where
         if (t > 0 && t < 1 && u > 0) {
-            const intersectX = ray2.start.x + t * (ray2.end.x - ray2.start.x);
-            const intersectY = ray2.start.y + t * (ray2.end.y - ray2.start.y);
+            const intersectX = Math.round(ray2.start.x + t * (ray2.end.x - ray2.start.x));
+            const intersectY = Math.round(ray2.start.y + t * (ray2.end.y - ray2.start.y));
             return { x: intersectX, y: intersectY };
         }
         else {
@@ -123,10 +123,10 @@ export default class GameEngine {
         const FRC = this._getRelativeRay(car.position, carHypot, car.direction, angle);
         const FLC = this._getRelativeRay(car.position, carHypot, car.direction, tau - angle);
         const carVertices = [
-            { x: FLC.end.x, y: FLC.end.y },
-            { x: FRC.end.x, y: FRC.end.y },
-            { x: RRC.end.x, y: RRC.end.y },
-            { x: RLC.end.x, y: RLC.end.y }, // back left
+            { x: Math.round(FLC.end.x), y: Math.round(FLC.end.y) },
+            { x: Math.round(FRC.end.x), y: Math.round(FRC.end.y) },
+            { x: Math.round(RRC.end.x), y: Math.round(RRC.end.y) },
+            { x: Math.round(RLC.end.x), y: Math.round(RLC.end.y) }, // back left
         ];
         const carSides = [
             { start: { x: RRC.end.x, y: RRC.end.y }, end: { x: FRC.end.x, y: FRC.end.y } },
@@ -147,4 +147,4 @@ export default class GameEngine {
         return { start: pos, end: rayEndpoint };
     }
 }
-//# sourceMappingURL=gameEngine.js.map
+//# sourceMappingURL=GameEngine.js.map

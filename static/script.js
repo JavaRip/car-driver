@@ -1,7 +1,8 @@
-import GameEngine from './classes/gameEngine.js';
-import Controller from './classes/controller.js';
-import Car from './classes/vehicle.js';
-import Visualizer from './classes/visualizer.js';
+import Controller from './classes/Controller.js';
+import Car from './classes/Vehicle.js';
+import Visualizer from './classes/Visualizer.js';
+import Point from './classes/Point.js';
+import VectorLib from './classes/VectorLib.js';
 import map from './map.js';
 function delay(ms) {
     return new Promise((resolve, reject) => {
@@ -10,54 +11,44 @@ function delay(ms) {
             reject(new Error('failed to delay'));
     });
 }
-const canvas = document.querySelector('canvas');
-if (!canvas)
-    throw new Error();
-const controller = new Controller();
+// TODO add resetCar method to Car class
 function resetCarState() {
     return new Car({ x: 250, y: 150 }, 0, 0);
 }
-async function submitGameState(sensorWallIntersects, inputs) {
-    const data = {
-        sensors: sensorWallIntersects.map(x => x.length),
-        inputs: inputs,
-    };
-    const res = await fetch('/submitTrainingData', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-    });
-    if (!res.ok) {
-        throw new Error(`Failed to submit training data: ${res.status}`);
-    }
-}
-document.addEventListener('keydown', (event) => {
-    Controller.parseUserInput(event, controller);
-});
-document.addEventListener('keyup', (event) => {
-    Controller.parseUserInput(event, controller);
-});
-const targetFrameDuration = 32;
+// // TODO create supervisedAi class
+// async function submitGameState(sensorWallIntersects: intersect[], inputs: controlstate) {
+//   const data: trainingrow = {
+//     sensors: sensorWallIntersects.map(x => x.length),
+//     inputs: inputs,
+//   };
+//   const res = await fetch(
+//     '/submitTrainingData', {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify(data),
+//     },
+//   );
+//   if (!res.ok) {
+//     throw new Error(`Failed to submit training data: ${res.status}`);
+//   }
+// }
 async function main() {
-    let carState = resetCarState();
+    const targetFrameDuration = 32;
     let frameStartTime;
+    const car = new Car(new Point(250, 150), 0, 0);
     for (let i = 0; i < Infinity; i += 1) {
         frameStartTime = Date.now();
-        const carBody = GameEngine.getCarBody(carState);
-        const sensors = GameEngine.getCarSensors(carBody.vertices, carState.direction);
-        const sensorWallIntersects = GameEngine.findRealIntersect(sensors, map);
-        const sensorWallIntersectPoints = sensorWallIntersects.map(x => x.point);
-        const bodyWallIntersects = GameEngine.findRealIntersect(carBody.sides, map);
-        const bodyWallIntersectPoints = bodyWallIntersects.map(x => x.point);
-        if (bodyWallIntersects.length !== 0)
-            carState = resetCarState();
-        Visualizer.drawPointArray(canvas, sensorWallIntersectPoints, 3, 'gold');
-        Visualizer.drawPointArray(canvas, bodyWallIntersectPoints, 3, 'crimson');
-        Visualizer.drawVectorArray(canvas, carBody.sides, 3, 'skyblue', 'solid');
-        Visualizer.drawVectorArray(canvas, sensors, 3, 'hotpink', 'dashed');
-        Visualizer.drawVectorArray(canvas, map, 3, 'white', 'solid');
-        const inputs = await Controller.getApiInput(sensorWallIntersects);
-        // const inputs = await Controller.getInput(controller);
+        const sensorWallIntersects = VectorLib.findRealIntersect(car.sensors, map);
+        const carWallIntersects = VectorLib.findRealIntersect(car.body.sides, map);
+        // TODO reset car position if carWallIntersects.length > 0
+        Visualizer.drawPointArray(carWallIntersects.map(x => x.point), 3, 'crimson');
+        Visualizer.drawPointArray(sensorWallIntersects.map(x => x.point), 3, 'gold');
+        Visualizer.drawVectorArray(car.body.sides, 3, 'skyblue', 'solid');
+        Visualizer.drawVectorArray(car.sensors, 3, 'hotpink', 'dashed');
+        Visualizer.drawVectorArray(map, 3, 'white', 'solid');
+        // const inputs = await Controller.getApiInput(sensorWallIntersects);
+        const inputs = Controller.getInput();
+        car.move(inputs);
         const frameDuration = Date.now() - frameStartTime;
         let frameBuffer;
         if (targetFrameDuration - frameDuration > 0) {
@@ -67,8 +58,7 @@ async function main() {
             frameBuffer = 0;
         }
         await delay(frameBuffer);
-        Visualizer.clearViewports(canvas);
-        carState = GameEngine.moveVehicle(carState, inputs);
+        Visualizer.clearViewports();
     }
 }
 await main();
