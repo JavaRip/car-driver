@@ -10,13 +10,12 @@ function delay(ms) {
             reject(new Error('failed to delay'));
     });
 }
-const canvas = document.querySelector('canvas');
-if (!canvas)
-    throw new Error();
 const controller = new Controller();
+// TODO add resetCar method to Car class
 function resetCarState() {
     return new Car({ x: 250, y: 150 }, 0, 0);
 }
+// TODO create supervisedAi class
 async function submitGameState(sensorWallIntersects, inputs) {
     const data = {
         sensors: sensorWallIntersects.map(x => x.length),
@@ -31,12 +30,6 @@ async function submitGameState(sensorWallIntersects, inputs) {
         throw new Error(`Failed to submit training data: ${res.status}`);
     }
 }
-document.addEventListener('keydown', (event) => {
-    Controller.parseUserInput(event, controller);
-});
-document.addEventListener('keyup', (event) => {
-    Controller.parseUserInput(event, controller);
-});
 const targetFrameDuration = 32;
 async function main() {
     let carState = resetCarState();

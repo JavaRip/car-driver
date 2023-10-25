@@ -12,16 +12,14 @@ function delay(ms: number): Promise<void> {
   });
 }
 
-const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-
-if (!canvas) throw new Error();
-
 const controller = new Controller();
 
+// TODO add resetCar method to Car class
 function resetCarState() {
   return new Car({ x: 250, y: 150 }, 0, 0);
 }
 
+// TODO create supervisedAi class
 async function submitGameState(sensorWallIntersects: intersect[], inputs: controlstate) {
   const data: trainingrow = {
     sensors: sensorWallIntersects.map(x => x.length),
@@ -41,13 +39,6 @@ async function submitGameState(sensorWallIntersects: intersect[], inputs: contro
   }
 }
 
-document.addEventListener('keydown', (event) => {
-  Controller.parseUserInput(event, controller);
-});
-
-document.addEventListener('keyup', (event) => {
-  Controller.parseUserInput(event, controller);
-});
 
 const targetFrameDuration = 32;
 
@@ -67,11 +58,11 @@ async function main(): Promise<void> {
 
     if (bodyWallIntersects.length !== 0) carState = resetCarState();
 
-    Visualizer.drawPointArray(canvas, sensorWallIntersectPoints, 3, 'gold');
-    Visualizer.drawPointArray(canvas, bodyWallIntersectPoints, 3, 'crimson');
-    Visualizer.drawVectorArray(canvas, carBody.sides, 3, 'skyblue', 'solid');
-    Visualizer.drawVectorArray(canvas, sensors, 3, 'hotpink', 'dashed');
-    Visualizer.drawVectorArray(canvas, map, 3, 'white', 'solid');
+    Visualizer.drawPointArray(sensorWallIntersectPoints, 3, 'gold');
+    Visualizer.drawPointArray(bodyWallIntersectPoints, 3, 'crimson');
+    Visualizer.drawVectorArray(carBody.sides, 3, 'skyblue', 'solid');
+    Visualizer.drawVectorArray(sensors, 3, 'hotpink', 'dashed');
+    Visualizer.drawVectorArray(map, 3, 'white', 'solid');
 
     const inputs = await Controller.getApiInput(sensorWallIntersects);
     // const inputs = await Controller.getInput(controller);
