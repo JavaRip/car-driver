@@ -32,14 +32,15 @@ function resetCarState() {
 //     throw new Error(`Failed to submit training data: ${res.status}`);
 //   }
 // }
-const targetFrameDuration = 32;
 async function main() {
+    const targetFrameDuration = 32;
     let frameStartTime;
     const car = new Car(new Point(250, 150), 0, 0);
     for (let i = 0; i < Infinity; i += 1) {
         frameStartTime = Date.now();
         const sensorWallIntersects = VectorLib.findRealIntersect(car.sensors, map);
         const carWallIntersects = VectorLib.findRealIntersect(car.body.sides, map);
+        // TODO reset car position if carWallIntersects.length > 0
         Visualizer.drawPointArray(carWallIntersects.map(x => x.point), 3, 'crimson');
         Visualizer.drawPointArray(sensorWallIntersects.map(x => x.point), 3, 'gold');
         Visualizer.drawVectorArray(car.body.sides, 3, 'skyblue', 'solid');
@@ -58,7 +59,6 @@ async function main() {
         }
         await delay(frameBuffer);
         Visualizer.clearViewports();
-        // carState = GameEngine.moveVehicle(inputs);
     }
 }
 await main();
