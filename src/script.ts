@@ -3,7 +3,9 @@ import Car from './classes/Vehicle.js';
 import Visualizer from './classes/Visualizer.js';
 import Point from './classes/Point.js';
 import VectorLib from './classes/VectorLib.js';
+import SupervisedLearner from './classes/SuperviesdLearner.js';
 import map from './map.js';
+console.log(SupervisedLearner);
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve, reject) => {
