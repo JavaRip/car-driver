@@ -7,3 +7,8 @@ canvas {
   width: 40em;
   border: 1px solid black
 }
+
+button {
+  width: 10rem;
+  height: 5rem;
+}

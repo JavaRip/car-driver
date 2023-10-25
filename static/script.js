@@ -12,9 +12,9 @@ function delay(ms) {
     });
 }
 // TODO add resetCar method to Car class
-function resetCarState() {
-    return new Car({ x: 250, y: 150 }, 0, 0);
-}
+// function resetCarState() {
+//   return new Car({ x: 250, y: 150 }, 0, 0);
+// }
 // // TODO create supervisedAi class
 // async function submitGameState(sensorWallIntersects: intersect[], inputs: controlstate) {
 //   const data: trainingrow = {
