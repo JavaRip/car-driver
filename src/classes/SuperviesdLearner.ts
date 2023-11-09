@@ -2,8 +2,10 @@ import Controller from './Controller.js';
 import Vehicle from './Vehicle.js';
 
 export default class SupervisedLearner {
-  static setReadyBtn = document.querySelector('#supervised') as HTMLButtonElement;
+  static setReadyBtn = document.querySelector('#gen-training') as HTMLButtonElement;
   static submitData = document.querySelector('#submit-training') as HTMLButtonElement;
+  static setSupervisedDriver = document.querySelector('#supervised-model') as HTMLButtonElement;
+
   static readyToRecord = false;
   static recording = false;
   static trainingData: number[][] = [];
@@ -11,7 +13,6 @@ export default class SupervisedLearner {
   static car: Vehicle;
 
   static async submitTrainingData(this: void): Promise<void> {
-    console.log('submitting training data');
     const res = await fetch('/train_model', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -20,6 +21,7 @@ export default class SupervisedLearner {
 
     if (res.ok) {
       console.log('training data submitted successfully');
+      SupervisedLearner.setSupervisedDriver.disabled = false;
     } else {
       console.error(`failed to submit training data: ${res.status}`);
     }
@@ -27,10 +29,15 @@ export default class SupervisedLearner {
 
   static init(): void {
     this.submitData.addEventListener('click', this.submitTrainingData);
+    this.submitData.disabled = true;
+    this.setSupervisedDriver.disabled = true;
+
+    this.setSupervisedDriver.addEventListener('click', () => {
+      Controller.mode = 'supervised';
+    });
 
     this.setReadyBtn.addEventListener('click', () => {
       SupervisedLearner.readyToRecord = true;
-      console.log('ready to record');
     });
 
     document.addEventListener('keydown', (event) => {
@@ -47,6 +54,8 @@ export default class SupervisedLearner {
       if (event.key === 'w' && SupervisedLearner.recording) {
         SupervisedLearner.recording = false;
         SupervisedLearner.readyToRecord = false;
+        SupervisedLearner.submitData.disabled = false;
+        console.log(SupervisedLearner.trainingData);
       }
     });
   }

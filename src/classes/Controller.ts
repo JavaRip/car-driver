@@ -20,12 +20,41 @@ export default class Controller {
     });
   }
 
-  static getInput(): controlState {
-    return {
-      turnLeft: Controller.turnLeft,
-      turnRight: Controller.turnRight,
-      accel: Controller.accel,
-    };
+  static async getInput(sensorLengths: number[]): Promise<controlState> {
+    if (Controller.mode === 'manual') {
+      return await new Promise((resolve) => {
+        resolve({
+          turnLeft: Controller.turnLeft,
+          turnRight: Controller.turnRight,
+          accel: Controller.accel,
+        });
+      });
+    } else if (Controller.mode === 'supervised') {
+      const res = await fetch('get_move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify([
+          [...sensorLengths],
+        ]),
+      });
+
+      if (!res.ok) {
+        console.error(`failed to get move: ${res.status}`);
+      }
+
+      const controlArr: number[] = await res.json() as number[];
+      console.log(controlArr);
+
+      return await new Promise((resolve) => {
+        resolve({
+          turnLeft: Boolean(controlArr[0]),
+          accel: Boolean(controlArr[1]),
+          turnRight: Boolean(controlArr[2]),
+        });
+      });
+    } else {
+      throw new Error(`invalid mode: ${Controller.mode}`);
+    }
   }
 
   static parseUserInput(event: KeyboardEvent): void {

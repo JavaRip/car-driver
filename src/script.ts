@@ -70,7 +70,7 @@ class Main {
         );
       }
 
-      const inputs = Controller.getInput();
+      const inputs = await Controller.getInput(sensorWallIntersects.map(x => x.length));
       Main.car.move(inputs);
 
       const frameDuration = Date.now() - frameStartTime;
