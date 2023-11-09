@@ -1,7 +1,7 @@
 import Point from './Point.js';
 import Vector from './Vector.js';
 import VectorLib from './VectorLib.js';
-export default class vehicle {
+export default class Vehicle {
     position;
     speed;
     direction;

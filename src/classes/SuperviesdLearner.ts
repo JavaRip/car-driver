@@ -1,21 +1,48 @@
+import Controller from './Controller.js';
+import Vehicle from './Vehicle.js';
+
 export default class SupervisedLearner {
+  static setReadyBtn = document.querySelector('#supervised') as HTMLButtonElement;
+  static readyToRecord = false;
   static recording = false;
-  static trainingData = [];
+  static trainingData: number[][] = [];
+  static trainingIntervalHandle: number;
+  static car: Vehicle;
 
   static init(): void {
+    this.setReadyBtn.addEventListener('click', () => {
+      SupervisedLearner.readyToRecord = true;
+      console.log('ready to record');
+    });
+
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'w') {
-        console.log('recording');
+      if (
+        event.key === 'w' &&
+        SupervisedLearner.readyToRecord &&
+        !SupervisedLearner.recording
+      ) {
         SupervisedLearner.recording = true;
       }
     });
 
     document.addEventListener('keyup', (event) => {
-      if (event.key === 'w') {
+      if (event.key === 'w' && SupervisedLearner.recording) {
         SupervisedLearner.recording = false;
-        console.log('saving recording');
+        SupervisedLearner.readyToRecord = false;
+        console.log(SupervisedLearner);
       }
     });
+  }
+
+  static recordData(sensorLengths: number[]): void {
+    this.trainingData.push([
+      Number(Controller.turnLeft),
+      Number(Controller.accel),
+      Number(Controller.turnRight),
+      ...sensorLengths,
+    ]);
+
+    console.log(SupervisedLearner.trainingData.length);
   }
 }
 

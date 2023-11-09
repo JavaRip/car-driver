@@ -8,7 +8,7 @@ export interface vehicleBody {
   sides: Vector[],
 }
 
-export default class vehicle {
+export default class Vehicle {
   position: Point;
   speed: number;
   direction: number;

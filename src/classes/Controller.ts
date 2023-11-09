@@ -1,5 +1,3 @@
-import Vehicle from './Vehicle';
-
 export interface controlState {
   turnLeft: boolean,
   turnRight: boolean,
@@ -10,6 +8,7 @@ export default class Controller {
   static turnLeft = false;
   static turnRight = false;
   static accel = false;
+  static mode = 'manual';
 
   static init(): void {
     document.addEventListener('keydown', (event) => {
@@ -27,29 +26,6 @@ export default class Controller {
       turnRight: Controller.turnRight,
       accel: Controller.accel,
     };
-  }
-
-  static async getApiInput(carState: Vehicle): Promise<Controller> {
-    const res = await fetch(
-      '/getMove', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(carState),
-      });
-
-    const controlArr: number[] = await res.json() as number[];
-
-    const inputs: controlState = {
-      turnLeft: Boolean(Number(controlArr[0])),
-      turnRight: Boolean(Number(controlArr[1])),
-      accel: Boolean(Number(controlArr[2])),
-    };
-
-    if (res.ok) {
-      return inputs;
-    } else {
-      throw new Error(`Error: ${res.status} ${res.statusText}`);
-    }
   }
 
   static parseUserInput(event: KeyboardEvent): void {

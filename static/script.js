@@ -48,7 +48,9 @@ async function main() {
         Visualizer.drawVectorArray(car.body.sides, 3, 'skyblue', 'solid');
         Visualizer.drawVectorArray(car.sensors, 3, 'hotpink', 'dashed');
         Visualizer.drawVectorArray(map, 3, 'white', 'solid');
-        // const inputs = await Controller.getApiInput(sensorWallIntersects);
+        if (SupervisedLearner.recording) {
+            SupervisedLearner.recordData(sensorWallIntersects.map(x => x.length));
+        }
         const inputs = Controller.getInput();
         car.move(inputs);
         const frameDuration = Date.now() - frameStartTime;

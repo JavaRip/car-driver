@@ -5,7 +5,6 @@ import Point from './classes/Point.js';
 import VectorLib from './classes/VectorLib.js';
 import SupervisedLearner from './classes/SuperviesdLearner.js';
 import map from './map.js';
-console.log(SupervisedLearner);
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -48,6 +47,7 @@ async function main(): Promise<void> {
 
   for (let i = 0; i < Infinity; i += 1) {
     frameStartTime = Date.now();
+
     const sensorWallIntersects = VectorLib.findRealIntersect(car.sensors, map);
     const carWallIntersects = VectorLib.findRealIntersect(car.body.sides, map);
 
@@ -58,7 +58,12 @@ async function main(): Promise<void> {
     Visualizer.drawVectorArray(car.sensors, 3, 'hotpink', 'dashed');
     Visualizer.drawVectorArray(map, 3, 'white', 'solid');
 
-    // const inputs = await Controller.getApiInput(sensorWallIntersects);
+    if (SupervisedLearner.recording) {
+      SupervisedLearner.recordData(
+        sensorWallIntersects.map(x => x.length),
+      );
+    }
+
     const inputs = Controller.getInput();
     car.move(inputs);
     const frameDuration = Date.now() - frameStartTime;
