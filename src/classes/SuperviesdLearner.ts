@@ -29,7 +29,7 @@ export default class SupervisedLearner {
       if (event.key === 'w' && SupervisedLearner.recording) {
         SupervisedLearner.recording = false;
         SupervisedLearner.readyToRecord = false;
-        console.log(SupervisedLearner);
+        // submit training data to server
       }
     });
   }

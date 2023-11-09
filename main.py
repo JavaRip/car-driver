@@ -15,8 +15,8 @@ def home():
 
 
 def get_model(training_data):
-    data_df_inputs = training_data[['sen1', 'sen2', 'sen3', 'sen4', 'sen5', 'sen6', 'sen7', 'sen8']]
-    data_df_outputs = training_data[['turnLeft', 'turnRight', 'accel']]
+    features = training_data[['sen1', 'sen2', 'sen3', 'sen4', 'sen5', 'sen6', 'sen7', 'sen8']]
+    labels = training_data[['turnLeft', 'turnRight', 'accel']]
 
     clf = MLPClassifier(
       solver='lbfgs',
@@ -26,7 +26,7 @@ def get_model(training_data):
       max_iter=500,
     )
 
-    clf.fit(data_df_inputs, data_df_outputs)
+    clf.fit(features, labels)
     return clf
 
 def clean_data(data, train):

@@ -66,6 +66,7 @@ async function main(): Promise<void> {
 
     const inputs = Controller.getInput();
     car.move(inputs);
+
     const frameDuration = Date.now() - frameStartTime;
 
     let frameBuffer;
