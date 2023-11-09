@@ -3,13 +3,31 @@ import Vehicle from './Vehicle.js';
 
 export default class SupervisedLearner {
   static setReadyBtn = document.querySelector('#supervised') as HTMLButtonElement;
+  static submitData = document.querySelector('#submit-training') as HTMLButtonElement;
   static readyToRecord = false;
   static recording = false;
   static trainingData: number[][] = [];
   static trainingIntervalHandle: number;
   static car: Vehicle;
 
+  static async submitTrainingData(this: void): Promise<void> {
+    console.log('submitting training data');
+    const res = await fetch('/train_model', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(SupervisedLearner.trainingData),
+    });
+
+    if (res.ok) {
+      console.log('training data submitted successfully');
+    } else {
+      console.error(`failed to submit training data: ${res.status}`);
+    }
+  }
+
   static init(): void {
+    this.submitData.addEventListener('click', this.submitTrainingData);
+
     this.setReadyBtn.addEventListener('click', () => {
       SupervisedLearner.readyToRecord = true;
       console.log('ready to record');
@@ -29,7 +47,6 @@ export default class SupervisedLearner {
       if (event.key === 'w' && SupervisedLearner.recording) {
         SupervisedLearner.recording = false;
         SupervisedLearner.readyToRecord = false;
-        // submit training data to server
       }
     });
   }

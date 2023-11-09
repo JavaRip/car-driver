@@ -8,13 +8,40 @@ import math
 from sklearn.neural_network import MLPClassifier
 
 app = Flask(__name__, static_url_path='', static_folder='static')
+MODEL = None
 
 @app.route("/")
 def home():
   return send_from_directory(app.static_folder, 'index.html')
 
+@app.route("/train_model", methods=['POST'])
+def train_model():
+  training_data = request.get_json()
+  cleaned_data = clean_training_data(training_data)
+  MODEL = get_model(cleaned_data)
+
+  return json.dumps({'ok': True}), 200, {'ContentType': 'application/json'}
+
+def clean_training_data(training_data):
+  headers = [
+    'turnLeft',
+    'turnRight',
+    'accel',
+    'sen1',
+    'sen2',
+    'sen3',
+    'sen4',
+    'sen5',
+    'sen6',
+    'sen7',
+    'sen8',
+  ]
+
+  training_data_df = pd.DataFrame(training_data, columns=headers)
+  return training_data_df.astype('int')
 
 def get_model(training_data):
+    training_data.info()
     features = training_data[['sen1', 'sen2', 'sen3', 'sen4', 'sen5', 'sen6', 'sen7', 'sen8']]
     labels = training_data[['turnLeft', 'turnRight', 'accel']]
 
@@ -28,33 +55,6 @@ def get_model(training_data):
 
     clf.fit(features, labels)
     return clf
-
-def clean_data(data, train):
-  data_df = data.copy()
-
-  if train:
-    data_df = data_df.loc[data_df['accel']==True]
-    data_df['turnLeft'] = data_df['turnLeft'].apply(lambda x: 1 if x else 0 )
-    data_df['turnRight'] = data_df['turnRight'].apply(lambda x: 1 if x else 0 )
-    data_df['accel'] = data_df['accel'].apply(lambda x: 1 if x else 0 )
-
-  data_df['sen1'] = data_df['sen1'].astype(float) / 1000
-  data_df['sen2'] = data_df['sen2'].astype(float) / 1000
-  data_df['sen3'] = data_df['sen3'].astype(float) / 1000
-  data_df['sen4'] = data_df['sen4'].astype(float) / 1000
-  data_df['sen5'] = data_df['sen5'].astype(float) / 1000
-  data_df['sen6'] = data_df['sen6'].astype(float) / 1000
-  data_df['sen7'] = data_df['sen7'].astype(float) / 1000
-  data_df['sen8'] = data_df['sen8'].astype(float) / 1000
-
-  return data_df
-
-print('cleaning data')
-source_data = pd.read_csv('./data.csv')
-cleaned_data = clean_data(source_data, True)
-print('preparing model')
-model = get_model(cleaned_data)
-print('model ready')
 
 @app.route('/getMove', methods=['POST'])
 def get_next_move():
