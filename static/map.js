@@ -1,6 +1,6 @@
 import Vector from './classes/Vector.js';
 import Point from './classes/Point.js';
-const map = [
+const circleMap = [
     new Vector(new Point(50, 750), new Point(50, 250)),
     new Vector(new Point(50, 250), new Point(75, 175)),
     new Vector(new Point(75, 175), new Point(175, 75)),
@@ -26,5 +26,13 @@ const map = [
     new Vector(new Point(650, 250), new Point(350, 250)),
     new Vector(new Point(350, 250), new Point(250, 350)),
 ];
-export default map;
+const straightMap = [
+    new Vector(new Point(50, 750), new Point(50, 250)),
+    new Vector(new Point(80, 750), new Point(80, 250)),
+];
+const maps = {
+    circleMap,
+    straightMap,
+};
+export default maps;
 //# sourceMappingURL=map.js.map

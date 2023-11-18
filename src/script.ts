@@ -3,7 +3,7 @@ import Car from './classes/Vehicle.js';
 import Visualizer from './classes/Visualizer.js';
 import Point from './classes/Point.js';
 import VectorLib from './classes/VectorLib.js';
-import maps from './maps.js';
+import maps from './map.js';
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve, reject) => {

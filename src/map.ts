@@ -1,6 +1,11 @@
 import Vector from './classes/Vector.js';
 import Point from './classes/Point.js';
 
+interface mapsExport {
+  straightMap: Vector[],
+  circleMap: Vector[],
+}
+
 const circleMap: Vector[] = [
   new Vector(new Point(50, 750), new Point(50, 250)),
   new Vector(new Point(50, 250), new Point(75, 175)),
@@ -33,9 +38,9 @@ const straightMap: Vector[] = [
   new Vector(new Point(80, 750), new Point(80, 250)),
 ];
 
-const maps = {
+const maps: mapsExport = {
   circleMap,
   straightMap,
-}
+};
 
 export default maps;
