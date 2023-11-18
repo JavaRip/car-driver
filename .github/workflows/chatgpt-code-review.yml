@@ -15,39 +15,13 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Chat GPT auto review
-      uses: JavaRip/gpt-code-review@v0.1
+      uses: JavaRip/gpt-code-review@v0.24
       with:
-        # Add required inputs for the JavaRip/gpt-code-review action here
+        # Add required inputs for the JavaRip/gpt-code-review a31Gction here
         # For example, if it requires a GitHub token, you can pass it like this:
         # github-token: ${{ secrets.GITHUB_TOKEN }}
         # Replace 'github-token' with the actual input name the action expects
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
         OPEN_API_KEY: ${{ secrets.OPEN_API_KEY}}
-        DELIM: ${{ secrets.DELIM }}
-
-  run-script:
-    needs: review
-    runs-on: ubuntu-22.04
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.11'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install pipenv
-        pipenv install
-
-    - name: Run script
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        OPEN_API_KEY: ${{ secrets.OPEN_API_KEY }}
-        DELIM: ${{ secrets.DELIM }}
-      run: |
-        pipenv run python main.py ${{ github.event.pull_request.head.ref }} ${{ github.event.pull_request.base.ref }} ${{ github.event.pull_request.number }} ${{ github.repository }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        REPO: ${{ github.repository }}
