@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Chat GPT auto review
-      uses: JavaRip/gpt-code-review@v0.15
+      uses: JavaRip/gpt-code-review@v0.16
       with:
         # Add required inputs for the JavaRip/gpt-code-review a31Gction here
         # For example, if it requires a GitHub token, you can pass it like this:
