@@ -50,7 +50,7 @@ def get_model(training_data):
 
     clf = MLPClassifier(
       solver='lbfgs',
-      # alpha=1e-8,
+      alpha=1e-8,
       hidden_layer_sizes=(20, 3),
       random_state=1,
       max_iter=500,

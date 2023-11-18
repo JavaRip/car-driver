@@ -9,8 +9,13 @@ export default class Controller {
   static turnRight = false;
   static accel = false;
   static mode = 'manual';
+  static setManualBtn = document.querySelector('#manual') as HTMLButtonElement;
 
   static init(): void {
+    Controller.setManualBtn.addEventListener('click', () => {
+      Controller.mode = 'manual';
+    });
+
     document.addEventListener('keydown', (event) => {
       Controller.parseUserInput(event);
     });
@@ -43,7 +48,6 @@ export default class Controller {
       }
 
       const controlArr: number[] = await res.json() as number[];
-      console.log(controlArr);
 
       return await new Promise((resolve) => {
         resolve({

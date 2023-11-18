@@ -6,38 +6,6 @@ import VectorLib from './classes/VectorLib.js';
 import SupervisedLearner from './classes/SuperviesdLearner.js';
 import map from './map.js';
 
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(resolve, ms);
-    if (!timeoutId) reject(new Error('failed to delay'));
-  });
-}
-
-// TODO add resetCar method to Car class
-// function resetCarState() {
-//   return new Car({ x: 250, y: 150 }, 0, 0);
-// }
-
-// // TODO create supervisedAi class
-// async function submitGameState(sensorWallIntersects: intersect[], inputs: controlstate) {
-//   const data: trainingrow = {
-//     sensors: sensorWallIntersects.map(x => x.length),
-//     inputs: inputs,
-//   };
-
-//   const res = await fetch(
-//     '/submitTrainingData', {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(data),
-//     },
-//   );
-
-//   if (!res.ok) {
-//     throw new Error(`Failed to submit training data: ${res.status}`);
-//   }
-// }
-
 class Main {
   static carReset = true; // TODO create UI to set this
   static car: Car = new Car(new Point(250, 150), 0, 0);
@@ -52,7 +20,6 @@ class Main {
       const sensorWallIntersects = VectorLib.findRealIntersect(Main.car.sensors, map);
       const carWallIntersects = VectorLib.findRealIntersect(Main.car.body.sides, map);
 
-      // TODO reset car position if carWallIntersects.length > 0
       Visualizer.drawPointArray(carWallIntersects.map(x => x.point), 3, 'crimson');
 
       if (carWallIntersects.length > 0) {
@@ -81,7 +48,7 @@ class Main {
       } else {
         frameBuffer = 0;
       }
-      await delay(frameBuffer);
+      await Main.delay(frameBuffer);
 
       Visualizer.clearViewports();
     }
@@ -89,6 +56,13 @@ class Main {
 
   static resetCar(): Car {
     return new Car(new Point(250, 150), 0, 0);
+  }
+
+  static delay(ms: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(resolve, ms);
+      if (!timeoutId) reject(new Error('failed to delay'));
+    });
   }
 }
 
