@@ -3,7 +3,7 @@ import Car from './classes/Vehicle.js';
 import Visualizer from './classes/Visualizer.js';
 import Point from './classes/Point.js';
 import VectorLib from './classes/VectorLib.js';
-import map from './map.js';
+import maps from './maps.js';
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -39,6 +39,7 @@ function delay(ms: number): Promise<void> {
 
 
 async function main(): Promise<void> {
+  const map = maps.straightMap;
   const targetFrameDuration = 32;
   let frameStartTime;
 
