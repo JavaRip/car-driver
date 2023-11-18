@@ -3,7 +3,7 @@ import Car from './classes/Vehicle.js';
 import Visualizer from './classes/Visualizer.js';
 import Point from './classes/Point.js';
 import VectorLib from './classes/VectorLib.js';
-import map from './map.js';
+import maps from './map.js';
 function delay(ms) {
     return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(resolve, ms);
@@ -12,9 +12,9 @@ function delay(ms) {
     });
 }
 // TODO add resetCar method to Car class
-function resetCarState() {
-    return new Car({ x: 250, y: 150 }, 0, 0);
-}
+// function resetCarState() {
+//   return new Car({ x: 250, y: 150 }, 0, 0);
+// }
 // // TODO create supervisedAi class
 // async function submitGameState(sensorWallIntersects: intersect[], inputs: controlstate) {
 //   const data: trainingrow = {
@@ -33,6 +33,7 @@ function resetCarState() {
 //   }
 // }
 async function main() {
+    const map = maps.straightMap;
     const targetFrameDuration = 32;
     let frameStartTime;
     const car = new Car(new Point(250, 150), 0, 0);
