@@ -17,7 +17,7 @@ jobs:
     - name: Chat GPT auto review
       uses: JavaRip/gpt-code-review@v0.26
       with:
-        # Add required inputs for the JavaRip/gpt-code-review a31Gction here
+        # Add required inputs for the JavaRip/gpt-code-review action here
         # For example, if it requires a GitHub token, you can pass it like this:
         # github-token: ${{ secrets.GITHUB_TOKEN }}
         # Replace 'github-token' with the actual input name the action expects
